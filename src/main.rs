@@ -1,4 +1,4 @@
-use usb_play::{
+use g213_colours::{
     g213_keyboard::{find_g213_keyboard, set_whole_keyboard_color},
     x11_colours::get_colour_def,
 };

@@ -9,6 +9,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
 
 [[package]]
+name = "g213_colours"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "lazy_static",
+ "rusb",
+]
+
+[[package]]
 name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -52,15 +61,6 @@ checksum = "44a8c36914f9b1a3be712c1dfa48c9b397131f9a75707e570a391735f785c5d1"
 dependencies = [
  "libc",
  "libusb1-sys",
-]
-
-[[package]]
-name = "usb-play"
-version = "0.1.0"
-dependencies = [
- "hex",
- "lazy_static",
- "rusb",
 ]
 
 [[package]]
