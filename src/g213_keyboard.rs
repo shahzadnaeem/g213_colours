@@ -1,10 +1,11 @@
 use rusb::{devices, Device, DeviceDescriptor, DeviceHandle, GlobalContext};
 use std::time::Duration;
 
-pub const LOGITECH: u16 = 0x046d;
-pub const G213: u16 = 0xc336;
+pub const LOGITECH: u16 = 0x046d; // Vendor
+pub const G213: u16 = 0xc336; // Device
 
-const ENDPOINT: u8 = 0x82;
+const ENDPOINT: u8 = 0x82; // Read Interrupt
+
 const REQ_TYPE: u8 = 0x21;
 const REQ: u8 = 0x09;
 const VALUE: u16 = 0x0211;
@@ -17,7 +18,7 @@ pub fn is_g213_keyboard(descriptor: &DeviceDescriptor) -> bool {
 }
 
 fn send_set_whole_keyboard_color(handle: &DeviceHandle<GlobalContext>, color: u32) {
-    let command = format!("11ff0c3a0001{:x}0200000000000000000000", color);
+    let command = format!("11ff0c3a0001{:06x}0200000000000000000000", color);
 
     let mut bytes = [0u8; CMD_LEN];
 
