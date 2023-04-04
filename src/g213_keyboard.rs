@@ -46,7 +46,10 @@ pub fn find_g213_keyboard() -> Option<Device<GlobalContext>> {
     })
 }
 
-fn send_command_wrapper(device: Device<GlobalContext>, f: impl Fn(&DeviceHandle<GlobalContext>)) {
+fn send_command_wrapper(
+    device: Device<GlobalContext>,
+    cmd_fn: impl Fn(&DeviceHandle<GlobalContext>),
+) {
     let mut handle = device.open().expect("Unable to open device!");
 
     let mut kernel_driver_detached = false;
@@ -59,7 +62,7 @@ fn send_command_wrapper(device: Device<GlobalContext>, f: impl Fn(&DeviceHandle<
         kernel_driver_detached = true;
     }
 
-    f(&handle);
+    cmd_fn(&handle);
 
     if kernel_driver_detached {
         handle
