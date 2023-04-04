@@ -9,3 +9,7 @@ edition = "2021"
 rusb = "0.9.2"
 hex = "0.4.3"
 lazy_static = "1.4.0"
+
+[[bin]]
+name = "g213-cols"
+bench = false
