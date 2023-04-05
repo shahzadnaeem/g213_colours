@@ -33,8 +33,12 @@ fn rgb_to_rust() -> Vec<(String, u32)> {
 
             let name = if parts.len() == 4 {
                 parts[3].to_ascii_lowercase()
-            } else {
+            } else if parts.len() == 5 {
                 [parts[3], parts[4]].join(" ").to_ascii_lowercase()
+            } else {
+                [parts[3], parts[4], parts[5]]
+                    .join(" ")
+                    .to_ascii_lowercase()
             };
 
             (name, r * 256 * 256 + g * 256 + b)
@@ -64,13 +68,18 @@ mod x11_colours_tests {
     }
 
     #[test]
-    fn get_alice_blue_uc() {
-        assert_eq!(get_colour_def("ALICE Blue"), Some(0xf0f8ff));
+    fn get_alice_blue_mixed_case() {
+        assert_eq!(get_colour_def("ALICE blue"), Some(0xf0f8ff));
     }
 
     #[test]
     fn get_aliceblue() {
         assert_eq!(get_colour_def("AliceBlue"), Some(0xf0f8ff));
+    }
+
+    #[test]
+    fn get_aliceblue_mixed_case() {
+        assert_eq!(get_colour_def("AlicEBLUE"), Some(0xf0f8ff));
     }
 
     #[test]
@@ -80,6 +89,21 @@ mod x11_colours_tests {
 
     #[test]
     fn none_for_blue_uuu() {
-        assert_eq!(get_colour_def("blue_uuu"), None);
+        assert_eq!(get_colour_def("blue uuu"), None);
+    }
+
+    #[test]
+    fn get_first_snow() {
+        assert_eq!(get_colour_def("snow"), Some(0xfffafa));
+    }
+
+    #[test]
+    fn get_last_light_green() {
+        assert_eq!(get_colour_def("LightGreen"), Some(0x90ee90));
+    }
+
+    #[test]
+    fn get_medium_violet_red() {
+        assert_eq!(get_colour_def("mediumvioletRED"), Some(0xc71585));
     }
 }
