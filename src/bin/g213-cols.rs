@@ -1,5 +1,5 @@
 use g213_colours::{
-    g213_keyboard::{find_g213_keyboard, set_whole_keyboard_color},
+    g213_keyboard::{find_g213_keyboard, set_whole_keyboard_colour},
     x11_colours::get_x11_colour,
 };
 
@@ -14,7 +14,7 @@ fn main() -> ExitCode {
     let colour = get_x11_colour(&args).unwrap_or(RED);
 
     if let Some(device) = find_g213_keyboard() {
-        set_whole_keyboard_color(device, colour);
+        set_whole_keyboard_colour(device, colour);
     } else {
         eprintln!("No G213 keyboard found, sorry!");
         return ExitCode::FAILURE;
