@@ -61,7 +61,7 @@ pub fn get_x11_colour(args: &Vec<String>) -> Option<u32> {
     if args.is_empty() {
         colour = Some(WHITE);
     } else if args.len() == 1 {
-        if let Ok(numeric_col) = u32::from_str_radix(&args[0], 16) {
+        if let Ok(numeric_col) = u32::from_str_radix(&args[0].trim_start_matches("0x"), 16) {
             colour = Some(numeric_col);
         } else if let Some(named_col) = get_colour_def(&args[0]) {
             colour = Some(named_col);
