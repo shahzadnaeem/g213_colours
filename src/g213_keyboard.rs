@@ -34,8 +34,8 @@ fn send_to_keyboard(handle: &DeviceHandle<GlobalContext>, bytes: &mut [u8]) -> u
         .unwrap()
 }
 
-fn send_set_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, color: u32) {
-    let command = format!("11ff0c3a0001{:06x}0200000000000000000000", color);
+fn send_set_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, colour: u32) {
+    let command = format!("11ff0c3a0001{:06x}0200000000000000000000", colour);
 
     let mut bytes = [0u8; CMD_LEN];
 
