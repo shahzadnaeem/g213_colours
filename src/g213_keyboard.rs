@@ -1,4 +1,4 @@
-use rusb::{devices, Device, DeviceDescriptor, DeviceHandle, GlobalContext};
+use rusb::{devices, Device, DeviceDescriptor, DeviceHandle, Error, GlobalContext};
 use std::time::Duration;
 
 pub const LOGITECH: u16 = 0x046d; // Vendor
@@ -17,21 +17,20 @@ pub fn is_g213_keyboard(descriptor: &DeviceDescriptor) -> bool {
     descriptor.vendor_id() == LOGITECH && descriptor.product_id() == G213
 }
 
-fn send_to_keyboard(handle: &DeviceHandle<GlobalContext>, bytes: &mut [u8]) -> usize {
-    handle
-        .write_control(
-            REQ_TYPE,
-            REQ,
-            VALUE,
-            INDEX,
-            bytes,
-            Duration::from_millis(TIMEOUT_MS),
-        )
-        .unwrap();
+fn send_to_keyboard(
+    handle: &DeviceHandle<GlobalContext>,
+    bytes: &mut [u8],
+) -> Result<usize, Error> {
+    handle.write_control(
+        REQ_TYPE,
+        REQ,
+        VALUE,
+        INDEX,
+        bytes,
+        Duration::from_millis(TIMEOUT_MS),
+    )?;
 
-    handle
-        .read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS))
-        .unwrap()
+    handle.read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS))
 }
 
 fn send_set_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, colour: u32) {
@@ -41,7 +40,7 @@ fn send_set_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, colour: 
 
     hex::decode_to_slice(command, &mut bytes).unwrap();
 
-    let _bytes_sent = send_to_keyboard(handle, &mut bytes);
+    let _bytes_sent = send_to_keyboard(handle, &mut bytes).unwrap();
 
     // println!("{} bytes sent", _bytes_sent);
 }
