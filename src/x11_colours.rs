@@ -210,4 +210,44 @@ mod x11_colours_tests {
 
         assert_eq!(get_x11_colour(&args), None);
     }
+
+    #[test]
+    fn get_x11_hex() {
+        let args = vec!["ff0055"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xff0055));
+    }
+
+    #[test]
+    fn get_x11_hex_4digits() {
+        let args = vec!["ff00"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xff00));
+    }
+
+    #[test]
+    fn get_x11_hex_2digits() {
+        let args = vec!["f1"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xf1));
+    }
+
+    #[test]
+    fn get_x11_0x_hex() {
+        let args = vec!["0xbeefee"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xbeefee));
+    }
 }
