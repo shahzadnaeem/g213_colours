@@ -11,7 +11,7 @@ lazy_static! {
         let mut map = HashMap::new();
 
         for def in definitions.iter() {
-            map.insert(def.0.clone(), def.1.clone());
+            map.insert(def.0.clone(), def.1);
         }
 
         map
@@ -21,15 +21,15 @@ lazy_static! {
 fn rgb_to_rust() -> Vec<(String, u32)> {
     let lines = X11_COLOURS
         .lines()
-        .filter(|l| !l.starts_with("#") && l.len() != 0);
+        .filter(|l| !l.starts_with('#') && !l.is_empty());
 
     let definitions: Vec<_> = lines
         .map(|l| {
             let parts: Vec<_> = l.split_ascii_whitespace().collect();
 
-            let r = u32::from_str_radix(parts[0], 10).unwrap();
-            let g = u32::from_str_radix(parts[1], 10).unwrap();
-            let b = u32::from_str_radix(parts[2], 10).unwrap();
+            let r = parts[0].parse::<u32>().unwrap();
+            let g = parts[1].parse::<u32>().unwrap();
+            let b = parts[2].parse::<u32>().unwrap();
 
             let name = if parts.len() == 4 {
                 parts[3].to_ascii_lowercase()
@@ -49,7 +49,7 @@ fn rgb_to_rust() -> Vec<(String, u32)> {
 }
 
 fn get_colour_def(name: &str) -> Option<u32> {
-    let name_lc = name.to_ascii_lowercase().replace("_", " ");
+    let name_lc = name.to_ascii_lowercase().replace('_', " ");
     COLOUR_LOOKUP.get(&name_lc).copied()
 }
 
@@ -58,7 +58,7 @@ const WHITE: u32 = 0xffd0c0;
 pub fn get_x11_colour(args: &Vec<String>) -> Option<u32> {
     let mut colour: Option<u32> = None;
 
-    if args.len() == 0 {
+    if args.is_empty() {
         colour = Some(WHITE);
     } else if args.len() == 1 {
         if let Ok(numeric_col) = u32::from_str_radix(&args[0], 16) {

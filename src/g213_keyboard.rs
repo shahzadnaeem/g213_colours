@@ -24,7 +24,7 @@ fn send_to_keyboard(handle: &DeviceHandle<GlobalContext>, bytes: &mut [u8]) -> u
             REQ,
             VALUE,
             INDEX,
-            &bytes,
+            bytes,
             Duration::from_millis(TIMEOUT_MS),
         )
         .unwrap();
@@ -82,4 +82,36 @@ pub fn set_whole_keyboard_colour(device: Device<GlobalContext>, color: u32) {
     send_command_wrapper(device, |h| {
         send_set_whole_keyboard_colour(h, color);
     });
+}
+
+#[cfg(test)]
+mod g213_keyboard_tests {
+    use rusb::{ffi::libusb_device_descriptor, DeviceDescriptor};
+
+    use super::*;
+
+    #[test]
+    fn a_g213_keyboard() {
+
+        // TODO: Can't create this test as there is no way to create a DeviceDescriptor :(
+
+        // let descriptor = DeviceDescriptor {
+        //     descriptor: libusb_device_descriptor {
+        //         idVendor: LOGITECH,
+        //         idProduct: G213,
+        //         bDescriptorType: 0,
+        //         bDeviceClass: 0,
+        //         bDeviceProtocol: 0,
+        //         bDeviceSubClass: 0,
+        //         bLength: 0,
+        //         bMaxPacketSize0: 0,
+        //         bNumConfigurations: 0,
+        //         bcdDevice: 0,
+        //         bcdUSB: 0,
+        //         iManufacturer: 0,
+        //         iProduct: 0,
+        //         iSerialNumber: 0,
+        //     },
+        // };
+    }
 }

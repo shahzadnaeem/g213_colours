@@ -10,6 +10,10 @@ rusb = "0.9.2"
 hex = "0.4.3"
 lazy_static = "1.4.0"
 
+[lib]
+doctest = false
+
 [[bin]]
 name = "g213-cols"
+test = false
 bench = false
