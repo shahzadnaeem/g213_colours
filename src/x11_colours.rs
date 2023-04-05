@@ -21,7 +21,7 @@ lazy_static! {
 fn rgb_to_rust() -> Vec<(String, u32)> {
     let lines = X11_COLOURS
         .lines()
-        .filter(|l| !l.contains("#") && l.len() != 0);
+        .filter(|l| !l.starts_with("#") && l.len() != 0);
 
     let definitions: Vec<_> = lines
         .map(|l| {
@@ -48,14 +48,51 @@ fn rgb_to_rust() -> Vec<(String, u32)> {
     definitions
 }
 
-pub fn get_colour_def(name: &str) -> Option<u32> {
-    let name_lc = name.to_ascii_lowercase();
+fn get_colour_def(name: &str) -> Option<u32> {
+    let name_lc = name.to_ascii_lowercase().replace("_", " ");
     COLOUR_LOOKUP.get(&name_lc).copied()
+}
+
+const WHITE: u32 = 0xffd0c0;
+
+pub fn get_x11_colour(args: &Vec<String>) -> Option<u32> {
+    let mut colour: Option<u32> = None;
+
+    if args.len() == 0 {
+        colour = Some(WHITE);
+    } else if args.len() == 1 {
+        if let Ok(numeric_col) = u32::from_str_radix(&args[0], 16) {
+            colour = Some(numeric_col);
+        } else if let Some(named_col) = get_colour_def(&args[0]) {
+            colour = Some(named_col);
+        }
+    } else if args.len() == 2 {
+        let name = format!("{} {}", &args[0], &args[1]);
+
+        if let Some(named_col) = get_colour_def(&name) {
+            colour = Some(named_col)
+        }
+    } else if args.len() == 3 {
+        let name = format!("{} {} {}", &args[0], &args[1], &args[2]);
+
+        if let Some(named_col) = get_colour_def(&name) {
+            colour = Some(named_col)
+        }
+    }
+
+    colour
 }
 
 #[cfg(test)]
 mod x11_colours_tests {
     use super::*;
+
+    #[test]
+    fn num_colours() {
+        const NUM_COLOURS: usize = 752;
+
+        assert_eq!(COLOUR_LOOKUP.len(), NUM_COLOURS);
+    }
 
     #[test]
     fn get_white() {
@@ -105,5 +142,72 @@ mod x11_colours_tests {
     #[test]
     fn get_medium_violet_red() {
         assert_eq!(get_colour_def("mediumvioletRED"), Some(0xc71585));
+    }
+
+    #[test]
+    fn get_x11_default() {
+        let args = Vec::new();
+
+        assert_eq!(get_x11_colour(&args), Some(WHITE));
+    }
+
+    #[test]
+    fn get_x11_medium_violet_red() {
+        let args = vec!["Medium", "Violet", "Red"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xc71585));
+    }
+
+    #[test]
+    fn get_x11_alt_medium_violet_red() {
+        let args = vec!["Medium", "Violet Red"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xc71585));
+    }
+
+    #[test]
+    fn get_x11_with_underscores() {
+        let args = vec!["light_goldenrod", "yellow"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), Some(0xfafad2));
+    }
+
+    #[test]
+    fn none_for_x11_uknown() {
+        let args = vec!["not", "a_colour"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), None);
+    }
+
+    #[test]
+    fn none_for_x11_too_many_args() {
+        let args = vec!["four", "is", "too", "many"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), None);
+    }
+
+    #[test]
+    fn none_for_x11_too_many_more_args() {
+        let args = vec!["six", "is", "also", "too", "many", "args"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        assert_eq!(get_x11_colour(&args), None);
     }
 }

@@ -17,13 +17,7 @@ pub fn is_g213_keyboard(descriptor: &DeviceDescriptor) -> bool {
     descriptor.vendor_id() == LOGITECH && descriptor.product_id() == G213
 }
 
-fn send_set_whole_keyboard_color(handle: &DeviceHandle<GlobalContext>, color: u32) {
-    let command = format!("11ff0c3a0001{:06x}0200000000000000000000", color);
-
-    let mut bytes = [0u8; CMD_LEN];
-
-    hex::decode_to_slice(command, &mut bytes).unwrap();
-
+fn send_to_keyboard(handle: &DeviceHandle<GlobalContext>, bytes: &mut [u8]) -> usize {
     handle
         .write_control(
             REQ_TYPE,
@@ -36,8 +30,20 @@ fn send_set_whole_keyboard_color(handle: &DeviceHandle<GlobalContext>, color: u3
         .unwrap();
 
     handle
-        .read_interrupt(ENDPOINT, &mut bytes, Duration::from_millis(TIMEOUT_MS))
-        .unwrap();
+        .read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS))
+        .unwrap()
+}
+
+fn send_set_whole_keyboard_color(handle: &DeviceHandle<GlobalContext>, color: u32) {
+    let command = format!("11ff0c3a0001{:06x}0200000000000000000000", color);
+
+    let mut bytes = [0u8; CMD_LEN];
+
+    hex::decode_to_slice(command, &mut bytes).unwrap();
+
+    let _bytes_sent = send_to_keyboard(handle, &mut bytes);
+
+    // println!("{} bytes sent", _bytes_sent);
 }
 
 pub fn find_g213_keyboard() -> Option<Device<GlobalContext>> {

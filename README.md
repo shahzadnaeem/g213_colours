@@ -15,11 +15,13 @@ $ cargo build ## (add -r for release and change target/debug to target/release b
 
 # Needs to be run as root for access to the USB device
 
-$ sudo target/debug/g213_colours            # Default, an ok white on my keyboard
-$ sudo target/debug/g213_colours ffd0c0     # An ok white on my keyboard
-$ sudo target/debug/g213_colours 10d010     # A green
-$ sudo target/debug/g213_colours aliceblue  # Any valid X11 colour
-$ sudo target/debug/g213_colours alice blue # Any valid X11 two word colour
+$ sudo target/debug/g213_colours              # Default, an ok white on my keyboard
+$ sudo target/debug/g213_colours ffd0c0       # An ok white on my keyboard
+$ sudo target/debug/g213_colours 10d010       # A green
+$ sudo target/debug/g213_colours aliceblue    # Any valid X11 colour
+$ sudo target/debug/g213_colours alice blue   # Any valid X11 two (or three) word colour
+$ sudo target/debug/g213_colours "alice blue" # Multi word colour as a single argument
+$ sudo target/debug/g213_colours alice_blue   # Underscores are allowed
 
 ```
 
