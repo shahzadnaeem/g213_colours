@@ -55,3 +55,14 @@ pub fn cycle_command(device: Device<GlobalContext>, args: &Vec<String>) -> ExitC
 
     exit_code
 }
+
+pub fn help_command(_device: Device<GlobalContext>, _args: &Vec<String>) -> ExitCode {
+    println!("Help ...");
+
+    // TODO: Give some device details
+    println!("You do have a G213 keyboard ✅");
+
+    // TODO: Usual help stuff
+
+    ExitCode::SUCCESS
+}

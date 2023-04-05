@@ -3,12 +3,13 @@ use rusb::{Device, GlobalContext};
 
 use std::{env::args, process::ExitCode};
 
-use g213_colours::commands::{breathe_command, colour_command, cycle_command};
+use g213_colours::commands::{breathe_command, colour_command, cycle_command, help_command};
 
 enum Command {
     Colour(Vec<String>),
     Breathe(Vec<String>),
     Cycle(Vec<String>),
+    Help(Vec<String>),
 }
 
 fn get_command(args: Vec<String>) -> Command {
@@ -18,6 +19,7 @@ fn get_command(args: Vec<String>) -> Command {
         "colour" => Command::Colour(args.into_iter().skip(1).collect()),
         "breathe" => Command::Breathe(args.into_iter().skip(1).collect()),
         "cycle" => Command::Cycle(args.into_iter().skip(1).collect()),
+        "help" => Command::Help(args.into_iter().skip(1).collect()),
         _ => Command::Colour(args),
     }
 }
@@ -32,6 +34,7 @@ impl Run for Command {
             Command::Colour(args) => colour_command(device, args),
             Command::Breathe(args) => breathe_command(device, args),
             Command::Cycle(args) => cycle_command(device, args),
+            Command::Help(args) => help_command(device, args),
         }
     }
 }
