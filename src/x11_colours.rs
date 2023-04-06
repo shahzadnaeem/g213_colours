@@ -6,7 +6,7 @@ type ColourLookup = HashMap<String, u32>;
 
 lazy_static! {
     static ref COLOUR_LOOKUP: ColourLookup = {
-        let definitions = rgb_to_rust();
+        let definitions = parse_x11_colours();
 
         let mut map = HashMap::new();
 
@@ -18,7 +18,7 @@ lazy_static! {
     };
 }
 
-fn rgb_to_rust() -> Vec<(String, u32)> {
+fn parse_x11_colours() -> Vec<(String, u32)> {
     let lines = X11_COLOURS
         .lines()
         .filter(|l| !l.starts_with('#') && !l.is_empty());
@@ -55,7 +55,9 @@ fn get_colour_def(name: &str) -> Option<u32> {
 
 const WHITE: u32 = 0xffd0c0;
 
-pub fn get_x11_colour(args: &Vec<String>) -> Option<u32> {
+// TODO: Simplify by simply joining all args if more than 1?
+
+pub fn get_x11_colour(args: &[String]) -> Option<u32> {
     let mut colour: Option<u32> = None;
 
     if args.is_empty() {

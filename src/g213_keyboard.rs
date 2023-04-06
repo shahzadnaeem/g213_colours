@@ -13,6 +13,16 @@ const INDEX: u16 = 0x0001;
 const CMD_LEN: usize = 20;
 const TIMEOUT_MS: u64 = 200;
 
+#[repr(u8)]
+enum KeyboardRegions {
+    WholeKeyboard = 0,
+    Region1 = 1,
+    Region2 = 2,
+    Region3 = 3,
+    Region4 = 4,
+    Region5 = 5,
+}
+
 pub trait G213DeviceDescriptor {
     fn vendor_id(&self) -> u16;
     fn product_id(&self) -> u16;
@@ -45,43 +55,46 @@ fn send_to_keyboard(
         Duration::from_millis(TIMEOUT_MS),
     )?;
 
-    handle.read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS))
+    let res = handle.read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS));
+
+    // if let Ok(bytes) = res {
+    //     eprintln!("{} bytes sent", bytes);
+    // }
+
+    res
 }
 
-fn send_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, colour: u32) {
-    let command = format!("11ff0c3a0001{:06x}0200000000000000000000", colour);
-
+fn send_command(handle: &DeviceHandle<GlobalContext>, command: &str) -> Result<usize, Error> {
     let mut bytes = [0u8; CMD_LEN];
 
     hex::decode_to_slice(command, &mut bytes).unwrap();
 
-    let _bytes_sent = send_to_keyboard(handle, &mut bytes).unwrap();
+    send_to_keyboard(handle, &mut bytes)
+}
 
-    // println!("{} bytes sent", _bytes_sent);
+fn send_keyboard_colour(handle: &DeviceHandle<GlobalContext>, region: u8, colour: u32) {
+    let command = format!(
+        "11ff0c3a{:02x}01{:06x}0200000000000000000000",
+        region, colour
+    );
+
+    let _bytes_sent = send_command(handle, &command).unwrap();
+}
+
+fn send_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, colour: u32) {
+    send_keyboard_colour(handle, KeyboardRegions::WholeKeyboard as u8, colour);
 }
 
 fn send_breathe(handle: &DeviceHandle<GlobalContext>, speed: u16, colour: u32) {
     let command = format!("11ff0c3a0002{:06x}{:04x}006400000000000000", colour, speed);
 
-    let mut bytes = [0u8; CMD_LEN];
-
-    hex::decode_to_slice(command, &mut bytes).unwrap();
-
-    let _bytes_sent = send_to_keyboard(handle, &mut bytes).unwrap();
-
-    // println!("{} bytes sent", _bytes_sent);
+    let _bytes_sent = send_command(handle, &command).unwrap();
 }
 
 fn send_cycle(handle: &DeviceHandle<GlobalContext>, speed: u16) {
     let command = format!("11ff0c3a0003ffffff0000{:04x}64000000000000", speed);
 
-    let mut bytes = [0u8; CMD_LEN];
-
-    hex::decode_to_slice(command, &mut bytes).unwrap();
-
-    let _bytes_sent = send_to_keyboard(handle, &mut bytes).unwrap();
-
-    // println!("{} bytes sent", _bytes_sent);
+    let _bytes_sent = send_command(handle, &command).unwrap();
 }
 
 pub fn find_g213_keyboard() -> Option<Device<GlobalContext>> {
