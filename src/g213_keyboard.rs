@@ -13,14 +13,38 @@ const INDEX: u16 = 0x0001;
 const CMD_LEN: usize = 20;
 const TIMEOUT_MS: u64 = 200;
 
+const MIN_SPEED: u16 = 32;
+
 #[repr(u8)]
-enum KeyboardRegions {
+pub enum KeyboardRegions {
     WholeKeyboard = 0,
     Region1 = 1,
     Region2 = 2,
     Region3 = 3,
     Region4 = 4,
     Region5 = 5,
+}
+
+impl From<u8> for KeyboardRegions {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => Self::WholeKeyboard,
+            1 => Self::Region1,
+            2 => Self::Region2,
+            3 => Self::Region3,
+            4 => Self::Region4,
+            5 => Self::Region5,
+            _ => Self::WholeKeyboard,
+        }
+    }
+}
+
+pub fn limit_speed(speed: u16) -> u16 {
+    if speed < MIN_SPEED {
+        MIN_SPEED
+    } else {
+        speed
+    }
 }
 
 pub trait G213DeviceDescriptor {
@@ -55,13 +79,7 @@ fn send_to_keyboard(
         Duration::from_millis(TIMEOUT_MS),
     )?;
 
-    let res = handle.read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS));
-
-    // if let Ok(bytes) = res {
-    //     eprintln!("{} bytes sent", bytes);
-    // }
-
-    res
+    handle.read_interrupt(ENDPOINT, bytes, Duration::from_millis(TIMEOUT_MS))
 }
 
 fn send_command(handle: &DeviceHandle<GlobalContext>, command: &str) -> Result<usize, Error> {
@@ -132,6 +150,12 @@ fn send_command_wrapper(
 pub fn set_whole_keyboard_colour(device: Device<GlobalContext>, color: u32) {
     send_command_wrapper(device, |h| {
         send_whole_keyboard_colour(h, color);
+    });
+}
+
+pub fn set_region_colour(device: Device<GlobalContext>, region: u8, color: u32) {
+    send_command_wrapper(device, |h| {
+        send_keyboard_colour(h, region, color);
     });
 }
 
