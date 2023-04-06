@@ -99,10 +99,6 @@ fn send_keyboard_colour(handle: &DeviceHandle<GlobalContext>, region: u8, colour
     let _bytes_sent = send_command(handle, &command).unwrap();
 }
 
-fn send_whole_keyboard_colour(handle: &DeviceHandle<GlobalContext>, colour: u32) {
-    send_keyboard_colour(handle, KeyboardRegions::WholeKeyboard as u8, colour);
-}
-
 fn send_breathe(handle: &DeviceHandle<GlobalContext>, speed: u16, colour: u32) {
     let command = format!("11ff0c3a0002{:06x}{:04x}006400000000000000", colour, speed);
 
@@ -147,9 +143,9 @@ fn send_command_wrapper(
     }
 }
 
-pub fn set_whole_keyboard_colour(device: Device<GlobalContext>, color: u32) {
+pub fn set_keyboard_colour(device: Device<GlobalContext>, color: u32) {
     send_command_wrapper(device, |h| {
-        send_whole_keyboard_colour(h, color);
+        send_keyboard_colour(h, KeyboardRegions::WholeKeyboard as u8, color);
     });
 }
 

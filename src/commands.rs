@@ -1,6 +1,5 @@
 use crate::g213_keyboard::{
-    limit_speed, set_breathe, set_cycle, set_region_colour, set_whole_keyboard_colour,
-    KeyboardRegions,
+    limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour, KeyboardRegions,
 };
 use crate::x11_colours::get_x11_colour;
 use rusb::{Device, GlobalContext};
@@ -48,7 +47,9 @@ impl Run for Command<'_> {
     }
 }
 
-fn get_colour(args: &[String]) -> (u32, ExitCode) {
+// ----------------------------------------------------------------------------
+
+fn get_colour_or_red(args: &[String]) -> (u32, ExitCode) {
     const RED: u32 = 0xff1010;
 
     match get_x11_colour(args) {
@@ -58,9 +59,9 @@ fn get_colour(args: &[String]) -> (u32, ExitCode) {
 }
 
 fn colour_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
-    let (colour, exit_code) = get_colour(args);
+    let (colour, exit_code) = get_colour_or_red(args);
 
-    set_whole_keyboard_colour(device, colour);
+    set_keyboard_colour(device, colour);
 
     exit_code
 }
@@ -71,7 +72,7 @@ fn region_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
     if !args.is_empty() {
         let region: KeyboardRegions = args[0].parse::<u8>().unwrap().into();
 
-        let (colour, status) = get_colour(&args[1..]);
+        let (colour, status) = get_colour_or_red(&args[1..]);
 
         set_region_colour(device, region as u8, colour);
 
@@ -89,7 +90,7 @@ fn breathe_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
     if !args.is_empty() {
         let speed = limit_speed(args[0].parse::<u16>().unwrap());
 
-        let (colour, status) = get_colour(&args[1..]);
+        let (colour, status) = get_colour_or_red(&args[1..]);
 
         set_breathe(device, speed, colour);
 
