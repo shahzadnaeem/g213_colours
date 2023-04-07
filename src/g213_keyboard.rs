@@ -126,16 +126,28 @@ fn send_command_wrapper(
 
     let mut kernel_driver_detached = false;
 
+    // Then we detach the kernel driver so that we can access the device
     if handle.kernel_driver_active(INDEX as u8).unwrap() {
         handle
             .detach_kernel_driver(INDEX as u8)
-            .expect("Unable to detatch kernel USB driver");
+            .expect("Unable to detach kernel USB driver");
 
         kernel_driver_detached = true;
     }
 
+    // Now we claim the interface
+    handle
+        .claim_interface(INDEX as u8)
+        .expect("Unable to claim interface for device");
+
+    // Do our thing
     cmd_fn(&handle);
 
+    handle
+        .release_interface(INDEX as u8)
+        .expect("Unable to release interface for device");
+
+    // Let the kernel take over again
     if kernel_driver_detached {
         handle
             .attach_kernel_driver(INDEX as u8)
