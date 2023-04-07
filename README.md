@@ -21,7 +21,7 @@ You will need to ensure you have `sudo` access for some of the following command
 
 ## Commands
 
-See [X11 colour names](https://en.wikipedia.org/wiki/X11_color_names) for all supported colour name - eg alice blue, lawn green etc
+See [X11 colour names](https://en.wikipedia.org/wiki/X11_color_names) for all supported colour names - eg alice blue, lawn green etc
 
 ```text
 - Set whole keyboard colour
@@ -45,7 +45,7 @@ $ cargo build ## (add -r for release and change target/debug to target/release b
 
 # Needs to be run as root for access to the USB device
 
-$ sudo target/debug/g213_cols ...  # Run any commands as described above
+$ sudo target/debug/g213_cols ...  # Run any command as described above
 
 ```
 
