@@ -127,7 +127,7 @@ fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> Status {
 }
 
 fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> Status {
-    println!("g213-cols - version 0.2.0\n");
+    println!("g213-cols - version 0.2.2\n");
 
     // TODO: Give some device details
     println!("You do have a G213 keyboard ✅\n");
