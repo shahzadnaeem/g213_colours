@@ -12,26 +12,26 @@ pub enum Status {
     Failure,
 }
 
-#[derive(Serialize, Debug)]
-pub enum Command<'a> {
-    Colour(&'a [String]),
-    Region(&'a [String]),
-    Breathe(&'a [String]),
-    Cycle(&'a [String]),
-    Help(&'a [String]),
-    Unknown(&'a [String]),
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Command {
+    Colour(Vec<String>),
+    Region(Vec<String>),
+    Breathe(Vec<String>),
+    Cycle(Vec<String>),
+    Help(Vec<String>),
+    Unknown(Vec<String>),
 }
 
 pub fn get_command(args: &'_ [String]) -> Command {
     let cmd = if args.is_empty() { "" } else { &args[0] };
 
     match cmd.to_lowercase().as_str() {
-        "colour" => Command::Colour(&args[1..]),
-        "region" => Command::Region(&args[1..]),
-        "breathe" => Command::Breathe(&args[1..]),
-        "cycle" => Command::Cycle(&args[1..]),
-        "help" => Command::Help(&args[1..]),
-        _ => Command::Unknown(args),
+        "colour" => Command::Colour(args[1..].to_vec()),
+        "region" => Command::Region(args[1..].to_vec()),
+        "breathe" => Command::Breathe(args[1..].to_vec()),
+        "cycle" => Command::Cycle(args[1..].to_vec()),
+        "help" => Command::Help(args[1..].to_vec()),
+        _ => Command::Unknown(args.to_vec()),
     }
 }
 
@@ -39,7 +39,7 @@ pub trait Run {
     fn run(&self, device: Device<GlobalContext>) -> Status;
 }
 
-impl Run for Command<'_> {
+impl Run for Command {
     fn run(&self, device: Device<GlobalContext>) -> Status {
         match self {
             Command::Colour(args) => colour_command(device, args),
@@ -134,5 +134,5 @@ fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> Status {
 
     // TODO: Usual help stuff
 
-    Status::Success
+    Status::Failure
 }
