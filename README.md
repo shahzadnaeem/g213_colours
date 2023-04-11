@@ -15,9 +15,9 @@ As `g213-cols` needs to be run as root to control the G213 keyboard via USB, the
 You will need to ensure you have set up `sudo` access for some of the following commands.
 
 - Step 1 - Installing - standard cargo install
-  - `cargo install` will install `g213-cols` in `~/.cargo/bin`
+  - `cargo install g213_colours` will install `g213-cols` in `~/.cargo/bin`
     - Development
-      - Clone the github repository.
+      - Clone the github repository and change directory to it
       - `cargo install --path .`
 
 - Step 2 - Creating a `setuid root` version
@@ -30,7 +30,7 @@ You will need to ensure you have set up `sudo` access for some of the following 
 
 ## Commands
 
-See [X11 colour names](https://en.wikipedia.org/wiki/X11_color_names) for all supported colour names - eg alice blue, lawn green etc.
+See [X11 colour names](https://en.wikipedia.org/wiki/X11_color_names) for all supported colour names - eg alice blue, lawn green, DarkCyan etc.
 
 Choosing an invalid colour will result in RED being used. You can also use 'random' for a random colour.
 
@@ -50,7 +50,7 @@ Choosing an invalid colour will result in RED being used. You can also use 'rand
 | `g213-cols breathe 1000 [colour]`                     | sets the breathe time (in ms) for the [colour]                |
 | Set 'cycle' mode                                      |                                                               |
 | `g213-cols cycle 1000`                                | sets the cycle time (in ms) all colours                       |
-| Use last succeful saved command                       |                                                               |
+| Use last successful saved command                     |                                                               |
 | `g213-cols`                                           | Runs the last successful saved command from ~/.g213-cols.json |
 
 ### Abbreviations

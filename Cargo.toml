@@ -4,12 +4,10 @@ version = "0.2.0"
 edition = "2021"
 license = "MIT"
 description = "A utility to set the G213 keyboard backlight. Based on https://github.com/SebiTimeWaster/G213Colors."
-documentation = "https://github.com/shahzadnaeem/g213_colours/README.md"
+documentation = "https://github.com/shahzadnaeem/g213_colours/blob/main/README.md"
 repository = "https://github.com/shahzadnaeem/g213_colours"
 readme = "README.md"
-keywords = ["usb", "g213", "logitech", "x11"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+keywords = ["g213", "logitech", "x11", "colours", "cli"]
 
 [dependencies]
 rusb = "0.9.2"
