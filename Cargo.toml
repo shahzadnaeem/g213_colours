@@ -7,7 +7,7 @@ description = "A utility to set the G213 keyboard backlight. Based on https://gi
 documentation = "https://github.com/shahzadnaeem/g213_colours/README.md"
 repository = "https://github.com/shahzadnaeem/g213_colours"
 readme = "README.md"
-keywords = ["usb", "g213", "keyboard", "backlight", "logitech", "x11"]
+keywords = ["usb", "g213", "logitech", "x11"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
