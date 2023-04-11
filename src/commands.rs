@@ -22,7 +22,7 @@ pub enum Command {
     Unknown(Vec<String>),
 }
 
-pub fn get_command(args: &'_ [String]) -> Command {
+pub fn get_command(args: &[String]) -> Command {
     let cmd = if args.is_empty() { "" } else { &args[0] };
 
     match cmd.to_lowercase().as_str() {

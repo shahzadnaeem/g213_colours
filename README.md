@@ -11,7 +11,7 @@ This utility needs to be run as root to access the G213 keyboard via USB.
 You will need to ensure you have `sudo` access for some of the following commands.
 
 - Step 1 - Installing
-  - `cargo install --path .` will install the `g213-cols` in `~/.cargo/bin`
+  - `cargo install --path .` will install `g213-cols` in `~/.cargo/bin`
 - Step 2 - Creating a `setuid root` version
   - NOTE: We need to copy the utility to a different location. Otherwise further `cargo install` steps will fail.
   - Copy the above `g213-cols` binary to a location in your `PATH` - eg `~/bin`
