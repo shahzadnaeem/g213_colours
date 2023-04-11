@@ -127,13 +127,12 @@ fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> Status {
 }
 
 fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> Status {
-    println!("Help - version 0.2.0");
+    println!("g213-cols - version 0.2.0\n");
 
     // TODO: Give some device details
-    println!("You do have a G213 keyboard ✅");
+    println!("You do have a G213 keyboard ✅\n");
 
-    println!("Please see README.md in GitHub");
-    println!("https://github.com/shahzadnaeem/g213_colours");
+    println!("Please see -- https://crates.io/crates/g213_colours");
 
     Status::Failure
 }
