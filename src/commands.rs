@@ -26,11 +26,11 @@ pub fn get_command(args: &[String]) -> Command {
     let cmd = if args.is_empty() { "" } else { &args[0] };
 
     match cmd.to_lowercase().as_str() {
-        "colour" => Command::Colour(args[1..].to_vec()),
-        "region" => Command::Region(args[1..].to_vec()),
-        "breathe" => Command::Breathe(args[1..].to_vec()),
-        "cycle" => Command::Cycle(args[1..].to_vec()),
-        "help" => Command::Help(args[1..].to_vec()),
+        "colour" | "c" => Command::Colour(args[1..].to_vec()),
+        "region" | "r" => Command::Region(args[1..].to_vec()),
+        "breathe" | "b" => Command::Breathe(args[1..].to_vec()),
+        "cycle" | "cy" => Command::Cycle(args[1..].to_vec()),
+        "help" | "h" | "?" => Command::Help(args[1..].to_vec()),
         _ => Command::Unknown(args.to_vec()),
     }
 }
@@ -127,12 +127,13 @@ fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> Status {
 }
 
 fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> Status {
-    println!("Help ...");
+    println!("Help - version 0.2.0");
 
     // TODO: Give some device details
     println!("You do have a G213 keyboard ✅");
 
-    // TODO: Usual help stuff
+    println!("Please see README.md in GitHub");
+    println!("https://github.com/shahzadnaeem/g213_colours");
 
     Status::Failure
 }

@@ -14,8 +14,11 @@ As `g213-cols` needs to be run as root to control the G213 keyboard via USB, the
 
 You will need to ensure you have set up `sudo` access for some of the following commands.
 
-- Step 1 - Installing - standard cargo step
-  - `cargo install --path .` will install `g213-cols` in `~/.cargo/bin`
+- Step 1 - Installing - standard cargo install
+  - `cargo install` will install `g213-cols` in `~/.cargo/bin`
+    - Development
+      - Clone the github repository.
+      - `cargo install --path .`
 
 - Step 2 - Creating a `setuid root` version
   - NOTE: `g213-cols` must be copied to and run from a different location. Otherwise further `cargo install` steps may fail.
@@ -29,16 +32,18 @@ You will need to ensure you have set up `sudo` access for some of the following 
 
 See [X11 colour names](https://en.wikipedia.org/wiki/X11_color_names) for all supported colour names - eg alice blue, lawn green etc.
 
-Choosing an invalid colour will result in RED being used.
+Choosing an invalid colour will result in RED being used. You can also use 'random' for a random colour.
 
 | Command                                               |                                                               |
 | ----------------------------------------------------- | ------------------------------------------------------------- |
 | Set whole keyboard colour                             |                                                               |
 | `g213-cols colour`                                    | sets the default 'white'                                      |
-| `g213-cols colour ffff00`                             | sets the specified hex colour, yellow                         |
+| `g213-cols colour ffff00`                             | sets the specified hex colour, eg yellow                      |
+|                                                       | NOTE: 3 digit hex colour conversion - 1af -> 11aaff           |
 | `g213-cols colour lawn green`                         | sets the named X11 colour                                     |
 | `g213-cols colour "alice blue"`                       | sets the named X11 colour - as a single argument              |
 | `g213-cols colour dark_slate_blue`                    | sets the named X11 colour - underscores become spaces         |
+| `g213-cols colour random`                             | sets a random colour                                          |
 | Set the colour of a specific keyboard region - 1 to 5 |                                                               |
 | `g213-cols region 2 [colour]`                         | sets the region to the [colour] as defined above              |
 | Set 'breathe' mode                                    |                                                               |
@@ -48,7 +53,22 @@ Choosing an invalid colour will result in RED being used.
 | Use last succeful saved command                       |                                                               |
 | `g213-cols`                                           | Runs the last successful saved command from ~/.g213-cols.json |
 
+### Abbreviations
+
+| Command | Abbreviation |
+| ------- | ------------ |
+| colour  | c            |
+| region  | r            |
+| breathe | b            |
+| cycle   | cy           |
+| help    | h or ?       |
+
 ## Todo
 
-- Add random commands.
+- Help is terrible - but it's all here
+- Multiple region colours command - `g213-cols regions [colour1] [colour2] [colour3] [colour4] [colour5]`
 
+## Ideas - for others 😄
+
+- Support other Logitech keyboards
+- Support other manufacturers
