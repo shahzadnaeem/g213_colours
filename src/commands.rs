@@ -1,10 +1,18 @@
+use rusb::{Device, GlobalContext};
+use serde::{Deserialize, Serialize};
+
 use crate::g213_keyboard::{
     limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour, KeyboardRegions,
 };
 use crate::x11_colours::get_x11_colour;
-use rusb::{Device, GlobalContext};
-use std::process::ExitCode;
 
+#[repr(u8)]
+pub enum Status {
+    Success = 0,
+    Failure,
+}
+
+#[derive(Serialize, Debug)]
 pub enum Command<'a> {
     Colour(&'a [String]),
     Region(&'a [String]),
@@ -28,11 +36,11 @@ pub fn get_command(args: &'_ [String]) -> Command {
 }
 
 pub trait Run {
-    fn run(&self, device: Device<GlobalContext>) -> ExitCode;
+    fn run(&self, device: Device<GlobalContext>) -> Status;
 }
 
 impl Run for Command<'_> {
-    fn run(&self, device: Device<GlobalContext>) -> ExitCode {
+    fn run(&self, device: Device<GlobalContext>) -> Status {
         match self {
             Command::Colour(args) => colour_command(device, args),
             Command::Region(args) => region_command(device, args),
@@ -41,7 +49,7 @@ impl Run for Command<'_> {
             Command::Help(args) => help_command(device, args),
             Command::Unknown(cmd) => {
                 eprintln!("Uknown command: '{}'", cmd.join(" "));
-                ExitCode::FAILURE
+                Status::Failure
             }
         }
     }
@@ -49,76 +57,76 @@ impl Run for Command<'_> {
 
 // ----------------------------------------------------------------------------
 
-fn get_colour_or_red(args: &[String]) -> (u32, ExitCode) {
+fn get_colour_or_red(args: &[String]) -> (u32, Status) {
     const RED: u32 = 0xff1010;
 
     match get_x11_colour(args) {
-        Some(col) => (col, ExitCode::SUCCESS),
-        None => (RED, ExitCode::FAILURE),
+        Some(col) => (col, Status::Success),
+        None => (RED, Status::Failure),
     }
 }
 
-fn colour_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
-    let (colour, exit_code) = get_colour_or_red(args);
+fn colour_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+    let (colour, status) = get_colour_or_red(args);
 
     set_keyboard_colour(device, colour);
 
-    exit_code
+    status
 }
 
-fn region_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
-    let mut exit_code = ExitCode::FAILURE;
+fn region_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+    let mut status = Status::Failure;
 
     if !args.is_empty() {
         let region: KeyboardRegions = args[0].parse::<u8>().unwrap().into();
 
-        let (colour, status) = get_colour_or_red(&args[1..]);
+        let (colour, col_status) = get_colour_or_red(&args[1..]);
 
         set_region_colour(device, region as u8, colour);
 
-        exit_code = status;
+        status = col_status;
     } else {
         eprintln!("At least one - 'region' ['colour'] - argument needed for 'region' command");
     }
 
-    exit_code
+    status
 }
 
-fn breathe_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
-    let mut exit_code = ExitCode::FAILURE;
+fn breathe_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+    let mut status = Status::Failure;
 
     if !args.is_empty() {
         let speed = limit_speed(args[0].parse::<u16>().unwrap());
 
-        let (colour, status) = get_colour_or_red(&args[1..]);
+        let (colour, col_status) = get_colour_or_red(&args[1..]);
 
         set_breathe(device, speed, colour);
 
-        exit_code = status
+        status = col_status;
     } else {
         eprintln!("At least one - 'speed' ['colour'] - argument needed for 'breathe' command");
     }
 
-    exit_code
+    status
 }
 
-fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> ExitCode {
-    let mut exit_code = ExitCode::FAILURE;
+fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+    let mut status = Status::Failure;
 
     if args.len() == 1 {
         let speed = limit_speed(args[0].parse::<u16>().unwrap());
 
         set_cycle(device, speed);
 
-        exit_code = ExitCode::SUCCESS;
+        status = Status::Success;
     } else {
         eprintln!("One 'speed' argument needed for 'cycle' command");
     }
 
-    exit_code
+    status
 }
 
-fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> ExitCode {
+fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> Status {
     println!("Help ...");
 
     // TODO: Give some device details
@@ -126,5 +134,5 @@ fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> ExitCode {
 
     // TODO: Usual help stuff
 
-    ExitCode::SUCCESS
+    Status::Success
 }
