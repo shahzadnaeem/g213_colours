@@ -50,4 +50,5 @@ Choosing an invalid colour will result in RED being used.
 
 ## Todo
 
-- Make an installable binary and publish to crates.io
+- Add random commands.
+
