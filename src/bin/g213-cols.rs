@@ -28,18 +28,15 @@ fn main() -> ExitCode {
 
         let f = File::open(path);
 
-        match f {
-            Ok(mut fh) => {
-                let mut saved_cmd = String::new();
+        if let Ok(mut fh) = f {
+            let mut saved_cmd = String::new();
 
-                fh.read_to_string(&mut saved_cmd)
-                    .expect("Unable to read saved command");
+            fh.read_to_string(&mut saved_cmd)
+                .expect("Unable to read saved command");
 
-                command = serde_json::from_str(&saved_cmd).expect("Unable to use saved command");
+            command = serde_json::from_str(&saved_cmd).expect("Unable to use saved command");
 
-                eprintln!("Using saved command: {:?}", command);
-            }
-            _ => {}
+            eprintln!("Using saved command: {:?}", command);
         }
     }
 
@@ -52,8 +49,7 @@ fn main() -> ExitCode {
 
         let mut f = File::create(path).expect("Unable to open config file for saving");
 
-        f.write(ser_command.as_bytes())
-            .expect("Unable to save command");
+        Write::write_all(&mut f, ser_command.as_bytes()).expect("Unable to save command");
     }
 
     ExitCode::from(cmd_status as u8)
