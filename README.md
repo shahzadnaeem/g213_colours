@@ -1,5 +1,16 @@
 # Logitech G213 Keyboard USB Backlight Utility
 
+[![Crates.io][crates-badge]][crates-url]
+[![Build Status][actions-badge]][actions-url]
+[![MIT licensed][mit-badge]][mit-url]
+
+[crates-badge]: https://img.shields.io/crates/v/g213_colours
+[crates-url]: https://crates.io/crates/g213_colours
+[actions-badge]: https://github.com/shahzadnaeem/g213_colours/actions/workflows/rust.yml/badge.svg?branch=main
+[actions-url]: https://github.com/shahzadnaeem/g213_colours/actions/workflows/rust.yml
+[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[mit-url]: https://github.com/shahzadnaeem/g213_colours/blob/main/MIT-License
+
 ## Introduction
 
 A Rust version of [G213Colors](https://github.com/SebiTimeWaster/G213Colors)
