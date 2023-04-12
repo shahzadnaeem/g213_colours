@@ -2,9 +2,10 @@ use rusb::{Device, GlobalContext};
 use serde::{Deserialize, Serialize};
 
 use crate::g213_keyboard::{
-    limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour, KeyboardRegions,
+    self, limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour,
+    KeyboardRegions,
 };
-use crate::x11_colours::get_x11_colour;
+use crate::x11_colours::{get_x11_colour, get_x11_colours};
 
 #[repr(u8)]
 pub enum Status {
@@ -16,6 +17,7 @@ pub enum Status {
 pub enum Command {
     Colour(Vec<String>),
     Region(Vec<String>),
+    Regions(Vec<String>),
     Breathe(Vec<String>),
     Cycle(Vec<String>),
     Help(Vec<String>),
@@ -28,6 +30,7 @@ pub fn get_command(args: &[String]) -> Command {
     match cmd.to_lowercase().as_str() {
         "colour" | "c" => Command::Colour(args[1..].to_vec()),
         "region" | "r" => Command::Region(args[1..].to_vec()),
+        "regions" | "rs" => Command::Regions(args[1..].to_vec()),
         "breathe" | "b" => Command::Breathe(args[1..].to_vec()),
         "cycle" | "cy" => Command::Cycle(args[1..].to_vec()),
         "help" | "h" | "?" => Command::Help(args[1..].to_vec()),
@@ -36,14 +39,15 @@ pub fn get_command(args: &[String]) -> Command {
 }
 
 pub trait Run {
-    fn run(&self, device: Device<GlobalContext>) -> Status;
+    fn run(&self, device: &Device<GlobalContext>) -> Status;
 }
 
 impl Run for Command {
-    fn run(&self, device: Device<GlobalContext>) -> Status {
+    fn run(&self, device: &Device<GlobalContext>) -> Status {
         match self {
             Command::Colour(args) => colour_command(device, args),
             Command::Region(args) => region_command(device, args),
+            Command::Regions(args) => regions_command(device, args),
             Command::Breathe(args) => breathe_command(device, args),
             Command::Cycle(args) => cycle_command(device, args),
             Command::Help(args) => help_command(device, args),
@@ -57,16 +61,23 @@ impl Run for Command {
 
 // ----------------------------------------------------------------------------
 
-fn get_colour_or_red(args: &[String]) -> (u32, Status) {
-    const RED: u32 = 0xff1010;
+const RED: u32 = 0xff1010;
 
+fn get_colour_or_red(args: &[String]) -> (u32, Status) {
     match get_x11_colour(args) {
         Some(col) => (col, Status::Success),
         None => (RED, Status::Failure),
     }
 }
 
-fn colour_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+fn get_colours_or_red(args: &[String], num: u8) -> (Vec<u32>, Status) {
+    match get_x11_colours(args, num) {
+        Some(cols) => (cols, Status::Success),
+        None => (vec![RED; num as usize], Status::Failure),
+    }
+}
+
+fn colour_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
     let (colour, status) = get_colour_or_red(args);
 
     set_keyboard_colour(device, colour);
@@ -74,7 +85,7 @@ fn colour_command(device: Device<GlobalContext>, args: &[String]) -> Status {
     status
 }
 
-fn region_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+fn region_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
     let mut status = Status::Failure;
 
     if !args.is_empty() {
@@ -92,7 +103,18 @@ fn region_command(device: Device<GlobalContext>, args: &[String]) -> Status {
     status
 }
 
-fn breathe_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+fn regions_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
+    let (colours, status) = get_colours_or_red(args, g213_keyboard::NUM_REGIONS);
+
+    colours
+        .iter()
+        .enumerate()
+        .for_each(|(region, colour)| set_region_colour(device, (region + 1) as u8, *colour));
+
+    status
+}
+
+fn breathe_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
     let mut status = Status::Failure;
 
     if !args.is_empty() {
@@ -110,7 +132,7 @@ fn breathe_command(device: Device<GlobalContext>, args: &[String]) -> Status {
     status
 }
 
-fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> Status {
+fn cycle_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
     let mut status = Status::Failure;
 
     if args.len() == 1 {
@@ -126,7 +148,7 @@ fn cycle_command(device: Device<GlobalContext>, args: &[String]) -> Status {
     status
 }
 
-fn help_command(_device: Device<GlobalContext>, _args: &[String]) -> Status {
+fn help_command(_device: &Device<GlobalContext>, _args: &[String]) -> Status {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     println!("g213-cols - version {}\n", VERSION);

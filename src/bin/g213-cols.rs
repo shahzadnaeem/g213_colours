@@ -73,7 +73,7 @@ fn main() -> ExitCode {
         }
     }
 
-    let cmd_status = command.run(device);
+    let cmd_status = command.run(&device);
 
     // Save the command for future use above, if it was successful
     if let Status::Success = cmd_status {

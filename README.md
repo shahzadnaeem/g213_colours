@@ -46,6 +46,9 @@ Choosing an invalid colour will result in RED being used. You can also use 'rand
 | `g213-cols colour random`                             | sets a random colour                                          |
 | Set the colour of a specific keyboard region - 1 to 5 |                                                               |
 | `g213-cols region 2 [colour]`                         | sets the region to the [colour] as defined above              |
+| Set the colours of all 5 keyboard regions             |                                                               |
+| `g213-cols regions [colour colour ...]`               | sets the regions to the [colours] as defined above            |
+|                                                       | last supplied colour is repeated to set all 5 regions         |
 | Set 'breathe' mode                                    |                                                               |
 | `g213-cols breathe 1000 [colour]`                     | sets the breathe time (in ms) for the [colour]                |
 | Set 'cycle' mode                                      |                                                               |
@@ -66,7 +69,6 @@ Choosing an invalid colour will result in RED being used. You can also use 'rand
 ## Todo
 
 - Help is terrible - but it's all here
-- Multiple region colours command - `g213-cols regions [colour1] [colour2] [colour3] [colour4] [colour5]`
 
 ## Ideas - for others 😄
 

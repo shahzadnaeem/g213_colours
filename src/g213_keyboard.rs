@@ -1,6 +1,8 @@
 use rusb::{devices, Device, DeviceDescriptor, DeviceHandle, Error, GlobalContext};
 use std::time::Duration;
 
+pub const NUM_REGIONS: u8 = 5;
+
 pub const LOGITECH: u16 = 0x046d; // Vendor
 pub const G213: u16 = 0xc336; // Device
 
@@ -11,7 +13,7 @@ const REQ: u8 = 0x09;
 const VALUE: u16 = 0x0211;
 const INDEX: u16 = 0x0001;
 const CMD_LEN: usize = 20;
-const TIMEOUT_MS: u64 = 200;
+const TIMEOUT_MS: u64 = 50;
 
 const MIN_SPEED: u16 = 32;
 
@@ -119,7 +121,7 @@ pub fn find_g213_keyboard() -> Option<Device<GlobalContext>> {
 }
 
 fn send_command_wrapper(
-    device: Device<GlobalContext>,
+    device: &Device<GlobalContext>,
     cmd_fn: impl Fn(&DeviceHandle<GlobalContext>),
 ) {
     let mut handle = device.open().expect("Unable to open device!");
@@ -155,25 +157,25 @@ fn send_command_wrapper(
     }
 }
 
-pub fn set_keyboard_colour(device: Device<GlobalContext>, color: u32) {
+pub fn set_keyboard_colour(device: &Device<GlobalContext>, color: u32) {
     send_command_wrapper(device, |h| {
         send_keyboard_colour(h, KeyboardRegions::WholeKeyboard as u8, color);
     });
 }
 
-pub fn set_region_colour(device: Device<GlobalContext>, region: u8, color: u32) {
+pub fn set_region_colour(device: &Device<GlobalContext>, region: u8, color: u32) {
     send_command_wrapper(device, |h| {
         send_keyboard_colour(h, region, color);
     });
 }
 
-pub fn set_breathe(device: Device<GlobalContext>, speed: u16, color: u32) {
+pub fn set_breathe(device: &Device<GlobalContext>, speed: u16, color: u32) {
     send_command_wrapper(device, |h| {
         send_breathe(h, speed, color);
     });
 }
 
-pub fn set_cycle(device: Device<GlobalContext>, speed: u16) {
+pub fn set_cycle(device: &Device<GlobalContext>, speed: u16) {
     send_command_wrapper(device, |h| {
         send_cycle(h, speed);
     });

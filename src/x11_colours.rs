@@ -98,6 +98,47 @@ pub fn get_x11_colour(args: &[String]) -> Option<u32> {
     colour
 }
 
+pub fn get_x11_colours(args: &[String], num: u8) -> Option<Vec<u32>> {
+    let mut col_str: String = "".to_string();
+    let mut n: u8 = 0;
+    let mut cols = Vec::<u32>::new();
+    let mut last_col_str: String = "".to_string();
+
+    if !args.is_empty() {
+        for arg in args {
+            col_str += arg;
+
+            if let Some(col) = get_x11_colour(&[col_str.clone()]) {
+                cols.push(col);
+                n += 1;
+
+                last_col_str = col_str.clone();
+                col_str.truncate(0);
+            }
+
+            if n == num {
+                break;
+            };
+        }
+    } else {
+        cols = vec![WHITE; num as usize];
+        n = num;
+    }
+
+    if !cols.is_empty() && n < num {
+        while n != num {
+            cols.push(get_x11_colour(&[last_col_str.clone()]).unwrap());
+            n += 1;
+        }
+    }
+
+    if n == num {
+        Some(cols)
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod x11_colours_tests {
     use super::*;
@@ -166,113 +207,108 @@ mod x11_colours_tests {
         assert_eq!(get_x11_colour(&args), Some(WHITE));
     }
 
+    fn to_string_vec(words: Vec<&str>) -> Vec<String> {
+        words.iter().map(|s| s.to_string()).collect()
+    }
+
     #[test]
     fn get_x11_medium_violet_red() {
-        let args = vec!["Medium", "Violet", "Red"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["Medium", "Violet", "Red"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xc71585));
     }
 
     #[test]
     fn get_x11_alt_medium_violet_red() {
-        let args = vec!["Medium", "Violet Red"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["Medium", "Violet Red"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xc71585));
     }
 
     #[test]
     fn get_x11_with_underscores() {
-        let args = vec!["light_goldenrod", "yellow"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["light_goldenrod", "yellow"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xfafad2));
     }
 
     #[test]
     fn none_for_x11_uknown() {
-        let args = vec!["not", "a_colour"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["not", "a_colour"]);
 
         assert_eq!(get_x11_colour(&args), None);
     }
 
     #[test]
     fn none_for_x11_too_many_args() {
-        let args = vec!["no", "four", "word", "colours"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["no", "four", "word", "colours"]);
 
         assert_eq!(get_x11_colour(&args), None);
     }
 
     #[test]
     fn get_x11_hex() {
-        let args = vec!["ff0055"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["ff0055"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xff0055));
     }
 
     #[test]
     fn get_x11_hex_4digits() {
-        let args = vec!["ff00"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["ff00"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xff00));
     }
 
     #[test]
     fn get_x11_hex_3digits_fs() {
-        let args = vec!["fff"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["fff"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xffffff));
     }
 
     #[test]
     fn get_x11_hex_3digits_1s() {
-        let args = vec!["111"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["111"]);
 
         assert_eq!(get_x11_colour(&args), Some(0x111111));
     }
 
     #[test]
     fn get_x11_hex_2digits() {
-        let args = vec!["f1"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["f1"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xf1));
     }
 
     #[test]
     fn get_x11_0x_hex() {
-        let args = vec!["0xbeefee"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let args = to_string_vec(vec!["0xbeefee"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xbeefee));
+    }
+
+    #[test]
+    fn get_5_colours() {
+        let args = to_string_vec(vec!["red", "blue", "green", "white", "black"]);
+
+        assert_eq!(
+            get_x11_colours(&args, 5),
+            Some(vec![0xff0000, 0xff, 0xff00, 0xffffff, 0x0])
+        );
+    }
+
+    #[test]
+    fn get_5_colours_empty_args() {
+        let args = to_string_vec(vec![]);
+
+        assert_eq!(get_x11_colours(&args, 5), Some(vec![WHITE, 5]));
+    }
+
+    #[test]
+    fn get_2_colours_multi_word() {
+        let args = to_string_vec(vec!["alice", "blue", "medium", "violet", "red"]);
+
+        assert_eq!(get_x11_colours(&args, 2), Some(vec![0xf0f8ff, 0xc71585]));
     }
 }
