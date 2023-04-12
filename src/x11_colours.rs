@@ -141,6 +141,8 @@ pub fn get_x11_colours(args: &[String], num: u8) -> Option<Vec<u32>> {
 
 #[cfg(test)]
 mod x11_colours_tests {
+    use crate::g213_keyboard::NUM_REGIONS;
+
     use super::*;
 
     #[test]
@@ -302,7 +304,39 @@ mod x11_colours_tests {
     fn get_5_colours_empty_args() {
         let args = to_string_vec(vec![]);
 
-        assert_eq!(get_x11_colours(&args, 5), Some(vec![WHITE, 5]));
+        assert_eq!(get_x11_colours(&args, 5), Some(vec![WHITE; 5]));
+    }
+
+    #[test]
+    fn get_5_colours_check_padding() {
+        let args = to_string_vec(vec!["red", "blue", "green", "white"]);
+
+        assert_eq!(
+            get_x11_colours(&args, 5),
+            Some(vec![0xff0000, 0xff, 0xff00, 0xffffff, 0xffffff])
+        );
+    }
+
+    #[test]
+    fn get_5_colours_single_random() {
+        let args = to_string_vec(vec!["random"]);
+
+        let colours = get_x11_colours(&args, NUM_REGIONS).unwrap();
+
+        assert_eq!(colours.len(), NUM_REGIONS as usize);
+
+        let mut differences: u32 = 0;
+
+        for i in 0..NUM_REGIONS {
+            for j in 0..NUM_REGIONS {
+                if i != j && colours[i as usize] != colours[j as usize] {
+                    differences += 1;
+                }
+            }
+        }
+
+        // Should be a higher threshold I guess
+        assert!(differences > NUM_REGIONS as u32);
     }
 
     #[test]
