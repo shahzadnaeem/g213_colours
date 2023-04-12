@@ -62,6 +62,7 @@ Choosing an invalid colour will result in RED being used. You can also use 'rand
 | ------- | ------------ |
 | colour  | c            |
 | region  | r            |
+| regions | rs           |
 | breathe | b            |
 | cycle   | cy           |
 | help    | h or ?       |

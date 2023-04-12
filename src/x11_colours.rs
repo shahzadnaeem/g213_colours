@@ -77,6 +77,7 @@ pub fn get_x11_colour(args: &[String]) -> Option<u32> {
         colour = Some(WHITE);
     } else if args.len() == 1 {
         if let Ok(mut numeric_col) = u32::from_str_radix(args[0].trim_start_matches("0x"), 16) {
+            numeric_col = numeric_col & 0xffffff;
             let digits = args[0].trim_start_matches("0x").len();
             if digits == 3 {
                 numeric_col = adjust_3_digit_colour(numeric_col);
@@ -286,6 +287,13 @@ mod x11_colours_tests {
     #[test]
     fn get_x11_0x_hex() {
         let args = to_string_vec(vec!["0xbeefee"]);
+
+        assert_eq!(get_x11_colour(&args), Some(0xbeefee));
+    }
+
+    #[test]
+    fn get_x11_0x_hex_max_3_bytes() {
+        let args = to_string_vec(vec!["0x1fbeefee"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xbeefee));
     }
