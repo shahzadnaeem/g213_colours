@@ -5,7 +5,7 @@ use crate::g213_keyboard::{
     self, limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour,
     KeyboardRegions,
 };
-use crate::x11_colours::{get_x11_colour, get_x11_colours};
+use crate::x11_colours::{get_x11_colour, get_x11_colours, x11_colour_names};
 
 #[repr(u8)]
 pub enum Status {
@@ -20,6 +20,7 @@ pub enum Command {
     Regions(Vec<String>),
     Breathe(Vec<String>),
     Cycle(Vec<String>),
+    List(Vec<String>),
     Help(Vec<String>),
     Unknown(Vec<String>),
 }
@@ -33,6 +34,7 @@ pub fn get_command(args: &[String]) -> Command {
         "regions" | "rs" => Command::Regions(args[1..].to_vec()),
         "breathe" | "b" => Command::Breathe(args[1..].to_vec()),
         "cycle" | "cy" => Command::Cycle(args[1..].to_vec()),
+        "list" | "l" => Command::List(args[1..].to_vec()),
         "help" | "h" | "?" => Command::Help(args[1..].to_vec()),
         _ => Command::Unknown(args.to_vec()),
     }
@@ -50,6 +52,7 @@ impl Run for Command {
             Command::Regions(args) => regions_command(device, args),
             Command::Breathe(args) => breathe_command(device, args),
             Command::Cycle(args) => cycle_command(device, args),
+            Command::List(args) => list_command(args),
             Command::Help(args) => help_command(device, args),
             Command::Unknown(cmd) => {
                 eprintln!("Uknown command: '{}'", cmd.join(" "));
@@ -146,6 +149,22 @@ fn cycle_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
     }
 
     status
+}
+
+fn list_command(args: &[String]) -> Status {
+    let names = x11_colour_names();
+
+    for name in names {
+        if args.is_empty() || name.contains(&args[0]) {
+            println!(
+                "{} {:#08x}",
+                name,
+                get_x11_colour(&[name.to_string()]).unwrap()
+            );
+        }
+    }
+
+    Status::Failure
 }
 
 fn help_command(_device: &Device<GlobalContext>, _args: &[String]) -> Status {

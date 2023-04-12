@@ -5,19 +5,20 @@ use rand::random;
 const X11_COLOURS: &str = include_str!("../rgb.txt");
 
 type ColourLookup = HashMap<String, u32>;
+type ColourNames = Vec<String>;
 
 lazy_static! {
+    static ref DEFINITIONS: Vec<(String, u32)> = parse_x11_colours();
     static ref COLOUR_LOOKUP: ColourLookup = {
-        let definitions = parse_x11_colours();
-
         let mut map = HashMap::new();
 
-        for def in definitions.iter() {
+        for def in DEFINITIONS.iter() {
             map.insert(def.0.clone(), def.1);
         }
 
         map
     };
+    static ref COLOUR_NAMES: ColourNames = DEFINITIONS.iter().map(|d| d.0.clone()).collect();
 }
 
 fn parse_x11_colours() -> Vec<(String, u32)> {
@@ -59,6 +60,14 @@ fn random_colour() -> u32 {
     random::<u32>() & 0x00ffffff
 }
 
+fn random_x11_colour() -> (&'static String, u32) {
+    let n = (random::<f32>() * (NUM_X11_COLOURS as f32)) as u32;
+
+    let name = &COLOUR_NAMES[n as usize];
+
+    (name, *COLOUR_LOOKUP.get(name).unwrap())
+}
+
 fn adjust_3_digit_colour(colour: u32) -> u32 {
     let d1: u32 = colour & 0xf00 >> 8;
     let d2: u32 = colour & 0xf0 >> 4;
@@ -67,17 +76,24 @@ fn adjust_3_digit_colour(colour: u32) -> u32 {
     (d1 * 16 + d1) << 16 | (d2 * 16 + d2) << 8 | (d3 * 16 + d3)
 }
 
-const WHITE: u32 = 0xffd0c0;
+pub const NUM_X11_COLOURS: usize = 752;
+pub const DEFAULT_WHITE: u32 = 0xffd0c0;
 const RANDOM: &str = "random";
+const RANDOM_X11: &str = "randomx11";
+
+pub fn x11_colour_names() -> Vec<&'static String> {
+    COLOUR_NAMES.iter().collect()
+}
 
 pub fn get_x11_colour(args: &[String]) -> Option<u32> {
     let mut colour: Option<u32> = None;
 
     if args.is_empty() {
-        colour = Some(WHITE);
+        colour = Some(DEFAULT_WHITE);
     } else if args.len() == 1 {
         if let Ok(mut numeric_col) = u32::from_str_radix(args[0].trim_start_matches("0x"), 16) {
-            numeric_col = numeric_col & 0xffffff;
+            numeric_col &= 0xffffff;
+
             let digits = args[0].trim_start_matches("0x").len();
             if digits == 3 {
                 numeric_col = adjust_3_digit_colour(numeric_col);
@@ -85,6 +101,8 @@ pub fn get_x11_colour(args: &[String]) -> Option<u32> {
             colour = Some(numeric_col);
         } else if args[0].to_ascii_lowercase() == RANDOM {
             colour = Some(random_colour())
+        } else if args[0].to_ascii_lowercase() == RANDOM_X11 {
+            colour = Some(random_x11_colour().1)
         } else if let Some(named_col) = get_colour_def(&args[0]) {
             colour = Some(named_col);
         }
@@ -122,7 +140,7 @@ pub fn get_x11_colours(args: &[String], num: u8) -> Option<Vec<u32>> {
             };
         }
     } else {
-        cols = vec![WHITE; num as usize];
+        cols = vec![DEFAULT_WHITE; num as usize];
         n = num;
     }
 
@@ -148,66 +166,64 @@ mod x11_colours_tests {
 
     #[test]
     fn num_colours() {
-        const NUM_COLOURS: usize = 752;
-
-        assert_eq!(COLOUR_LOOKUP.len(), NUM_COLOURS);
+        assert_eq!(COLOUR_LOOKUP.len(), NUM_X11_COLOURS);
     }
 
     #[test]
-    fn get_white() {
+    fn get_def_white() {
         assert_eq!(get_colour_def("white"), Some(0xffffff));
     }
 
     #[test]
-    fn get_alice_blue() {
+    fn get_def_alice_blue() {
         assert_eq!(get_colour_def("alice blue"), Some(0xf0f8ff));
     }
 
     #[test]
-    fn get_alice_blue_mixed_case() {
+    fn get_def_alice_blue_mixed_case() {
         assert_eq!(get_colour_def("ALICE blue"), Some(0xf0f8ff));
     }
 
     #[test]
-    fn get_aliceblue() {
+    fn get_def_aliceblue() {
         assert_eq!(get_colour_def("AliceBlue"), Some(0xf0f8ff));
     }
 
     #[test]
-    fn get_aliceblue_mixed_case() {
+    fn get_def_aliceblue_mixed_case() {
         assert_eq!(get_colour_def("AlicEBLUE"), Some(0xf0f8ff));
     }
 
     #[test]
-    fn none_for_bluuuu() {
+    fn def_none_for_bluuuu() {
         assert_eq!(get_colour_def("bluuuuu"), None);
     }
 
     #[test]
-    fn none_for_blue_uuu() {
+    fn def_none_for_blue_uuu() {
         assert_eq!(get_colour_def("blue uuu"), None);
     }
 
     #[test]
-    fn get_first_snow() {
+    fn get_def_first_snow() {
         assert_eq!(get_colour_def("snow"), Some(0xfffafa));
     }
 
     #[test]
-    fn get_last_light_green() {
+    fn get_def_last_light_green() {
         assert_eq!(get_colour_def("LightGreen"), Some(0x90ee90));
     }
 
     #[test]
-    fn get_medium_violet_red() {
+    fn get_def_medium_violet_red() {
         assert_eq!(get_colour_def("mediumvioletRED"), Some(0xc71585));
     }
 
     #[test]
-    fn get_x11_default() {
+    fn get_colour_default() {
         let args = Vec::new();
 
-        assert_eq!(get_x11_colour(&args), Some(WHITE));
+        assert_eq!(get_x11_colour(&args), Some(DEFAULT_WHITE));
     }
 
     fn to_string_vec(words: Vec<&str>) -> Vec<String> {
@@ -215,87 +231,102 @@ mod x11_colours_tests {
     }
 
     #[test]
-    fn get_x11_medium_violet_red() {
+    fn get_colour_medium_violet_red() {
         let args = to_string_vec(vec!["Medium", "Violet", "Red"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xc71585));
     }
 
     #[test]
-    fn get_x11_alt_medium_violet_red() {
+    fn get_colour_alt_medium_violet_red() {
         let args = to_string_vec(vec!["Medium", "Violet Red"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xc71585));
     }
 
     #[test]
-    fn get_x11_with_underscores() {
+    fn get_colour_with_underscores() {
         let args = to_string_vec(vec!["light_goldenrod", "yellow"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xfafad2));
     }
 
     #[test]
-    fn none_for_x11_uknown() {
+    fn get_colour_none_for_x11_uknown() {
         let args = to_string_vec(vec!["not", "a_colour"]);
 
         assert_eq!(get_x11_colour(&args), None);
     }
 
     #[test]
-    fn none_for_x11_too_many_args() {
+    fn get_colour_none_for_x11_too_many_args() {
         let args = to_string_vec(vec!["no", "four", "word", "colours"]);
 
         assert_eq!(get_x11_colour(&args), None);
     }
 
     #[test]
-    fn get_x11_hex() {
+    fn get_colour_hex() {
         let args = to_string_vec(vec!["ff0055"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xff0055));
     }
 
     #[test]
-    fn get_x11_hex_4digits() {
+    fn get_colour_hex_4digits() {
         let args = to_string_vec(vec!["ff00"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xff00));
     }
 
     #[test]
-    fn get_x11_hex_3digits_fs() {
+    fn get_colour_hex_3digits_fs() {
         let args = to_string_vec(vec!["fff"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xffffff));
     }
 
     #[test]
-    fn get_x11_hex_3digits_1s() {
+    fn get_colour_hex_3digits_1s() {
         let args = to_string_vec(vec!["111"]);
 
         assert_eq!(get_x11_colour(&args), Some(0x111111));
     }
 
     #[test]
-    fn get_x11_hex_2digits() {
+    fn get_colour_hex_2digits() {
         let args = to_string_vec(vec!["f1"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xf1));
     }
 
     #[test]
-    fn get_x11_0x_hex() {
+    fn get_colour_0x_hex() {
         let args = to_string_vec(vec!["0xbeefee"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xbeefee));
     }
 
     #[test]
-    fn get_x11_0x_hex_max_3_bytes() {
+    fn get_colour_0x_hex_max_3_bytes() {
         let args = to_string_vec(vec!["0x1fbeefee"]);
 
         assert_eq!(get_x11_colour(&args), Some(0xbeefee));
+    }
+
+    #[test]
+    fn get_random_colour() {
+        let col = random_colour();
+
+        assert!(col <= 0xffffff);
+    }
+
+    #[test]
+    fn get_random_x11_colour() {
+        let col = random_x11_colour();
+
+        assert!(!col.0.is_empty());
+        assert!(col.1 <= 0xffffff);
     }
 
     #[test]
@@ -312,7 +343,7 @@ mod x11_colours_tests {
     fn get_5_colours_empty_args() {
         let args = to_string_vec(vec![]);
 
-        assert_eq!(get_x11_colours(&args, 5), Some(vec![WHITE; 5]));
+        assert_eq!(get_x11_colours(&args, 5), Some(vec![DEFAULT_WHITE; 5]));
     }
 
     #[test]
