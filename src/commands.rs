@@ -2,7 +2,7 @@ use rusb::{Device, GlobalContext};
 use serde::{Deserialize, Serialize};
 
 use crate::g213_keyboard::{
-    self, limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour,
+    self, limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour, show_info,
     KeyboardRegions,
 };
 use crate::x11_colours::{get_x11_colour, get_x11_colours, x11_colour_names};
@@ -167,15 +167,20 @@ fn list_command(args: &[String]) -> Status {
     Status::Failure
 }
 
-fn help_command(_device: &Device<GlobalContext>, _args: &[String]) -> Status {
+fn help_command(device: &Device<GlobalContext>, _args: &[String]) -> Status {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     println!("g213-cols - version {}\n", VERSION);
-
-    // TODO: Give some device details
     println!("You do have a G213 keyboard ✅\n");
 
-    println!("Please see -- https://crates.io/crates/g213_colours");
+    println!("Device bus:   {}", device.bus_number());
+    println!("Device #:     {}", device.address());
+    println!("Device speed: {:?}", device.speed());
+
+    // Bit hacky, directly outputs info
+    show_info(device);
+
+    println!("\nPlease see -- https://crates.io/crates/g213_colours");
 
     Status::Failure
 }

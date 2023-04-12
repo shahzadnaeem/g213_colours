@@ -113,6 +113,32 @@ fn send_cycle(handle: &DeviceHandle<GlobalContext>, speed: u16) {
     let _bytes_sent = send_command(handle, &command).unwrap();
 }
 
+fn do_show_info(descriptor: &DeviceDescriptor, handle: &DeviceHandle<GlobalContext>) {
+    let timeout = std::time::Duration::from_millis(TIMEOUT_MS);
+    let lang = handle.read_languages(timeout).unwrap()[0];
+
+    println!(
+        "Manufacturer: {}",
+        handle
+            .read_manufacturer_string(lang, descriptor, timeout)
+            .unwrap()
+    );
+
+    println!(
+        "Product:      {}",
+        handle
+            .read_product_string(lang, descriptor, timeout)
+            .unwrap()
+    );
+
+    println!(
+        "Serial:       {}",
+        handle
+            .read_serial_number_string(lang, descriptor, timeout)
+            .unwrap()
+    );
+}
+
 pub fn find_g213_keyboard() -> Option<Device<GlobalContext>> {
     devices().unwrap().iter().find(|device| {
         let desc = device.device_descriptor().unwrap();
@@ -179,6 +205,12 @@ pub fn set_cycle(device: &Device<GlobalContext>, speed: u16) {
     send_command_wrapper(device, |h| {
         send_cycle(h, speed);
     });
+}
+
+pub fn show_info(device: &Device<GlobalContext>) {
+    let descriptor = device.device_descriptor().unwrap();
+
+    send_command_wrapper(device, |h| do_show_info(&descriptor, h));
 }
 
 #[cfg(test)]
