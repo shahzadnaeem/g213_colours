@@ -18,6 +18,7 @@ const TIMEOUT_MS: u64 = 50;
 const MIN_SPEED: u16 = 32;
 
 #[repr(u8)]
+#[derive(PartialEq)]
 pub enum KeyboardRegions {
     WholeKeyboard = 0,
     Region1 = 1,

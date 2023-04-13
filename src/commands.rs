@@ -8,9 +8,21 @@ use crate::g213_keyboard::{
 use crate::x11_colours::{get_x11_colour, get_x11_colours, x11_colour_names};
 
 #[repr(u8)]
+#[derive(PartialEq)]
 pub enum Status {
     Success = 0,
     Failure,
+    SuccessNoSave,
+}
+
+pub trait Successful {
+    fn successful(&self) -> bool;
+}
+
+impl Successful for Status {
+    fn successful(&self) -> bool {
+        Status::Success == *self || Status::SuccessNoSave == *self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -21,6 +33,7 @@ pub enum Command {
     Breathe(Vec<String>),
     Cycle(Vec<String>),
     List(Vec<String>),
+    Saved(Vec<String>),
     Help(Vec<String>),
     Unknown(Vec<String>),
 }
@@ -35,6 +48,7 @@ pub fn get_command(args: &[String]) -> Command {
         "breathe" | "b" => Command::Breathe(args[1..].to_vec()),
         "cycle" | "cy" => Command::Cycle(args[1..].to_vec()),
         "list" | "l" => Command::List(args[1..].to_vec()),
+        "saaved" | "s" => Command::Saved(args[1..].to_vec()),
         "help" | "h" | "?" => Command::Help(args[1..].to_vec()),
         _ => Command::Unknown(args.to_vec()),
     }
@@ -42,6 +56,7 @@ pub fn get_command(args: &[String]) -> Command {
 
 pub trait Run {
     fn run(&self, device: &Device<GlobalContext>) -> Status;
+    fn has_args(&self) -> bool;
 }
 
 impl Run for Command {
@@ -53,11 +68,26 @@ impl Run for Command {
             Command::Breathe(args) => breathe_command(device, args),
             Command::Cycle(args) => cycle_command(device, args),
             Command::List(args) => list_command(args),
+            Command::Saved(args) => saved_command(args),
             Command::Help(args) => help_command(device, args),
-            Command::Unknown(cmd) => {
-                eprintln!("Uknown command: '{}'", cmd.join(" "));
-                Status::Failure
+            Command::Unknown(args) => {
+                eprintln!("Uknown command: '{}'", args.join(" "));
+                Status::SuccessNoSave
             }
+        }
+    }
+
+    fn has_args(&self) -> bool {
+        match self {
+            Command::Colour(args) => !args.is_empty(),
+            Command::Region(args) => !args.is_empty(),
+            Command::Regions(args) => !args.is_empty(),
+            Command::Breathe(args) => !args.is_empty(),
+            Command::Cycle(args) => !args.is_empty(),
+            Command::List(args) => !args.is_empty(),
+            Command::Saved(args) => !args.is_empty(),
+            Command::Help(args) => !args.is_empty(),
+            Command::Unknown(_) => false,
         }
     }
 }
@@ -164,7 +194,13 @@ fn list_command(args: &[String]) -> Status {
         }
     }
 
-    Status::Failure
+    Status::SuccessNoSave
+}
+
+fn saved_command(args: &[String]) -> Status {
+    println!("TODO: Show saved command.");
+
+    Status::SuccessNoSave
 }
 
 fn help_command(device: &Device<GlobalContext>, _args: &[String]) -> Status {
@@ -182,5 +218,43 @@ fn help_command(device: &Device<GlobalContext>, _args: &[String]) -> Status {
 
     println!("\nPlease see -- https://crates.io/crates/g213_colours");
 
-    Status::Failure
+    Status::SuccessNoSave
+}
+
+#[cfg(test)]
+mod commands_tests {
+
+    use super::*;
+
+    fn to_string_vec(words: Vec<&str>) -> Vec<String> {
+        words.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn colour_command() {
+        let args = to_string_vec(vec!["colour"]);
+
+        let cmd = get_command(&args);
+
+        assert!(match cmd {
+            Command::Colour(_) => true,
+            _ => false,
+        });
+
+        assert!(!cmd.has_args());
+    }
+
+    #[test]
+    fn colour_command_with_args() {
+        let args = to_string_vec(vec!["colour", "0xff00ff"]);
+
+        let cmd = get_command(&args);
+
+        assert!(match cmd {
+            Command::Colour(_) => true,
+            _ => false,
+        });
+
+        assert!(cmd.has_args());
+    }
 }

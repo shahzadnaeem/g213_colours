@@ -6,7 +6,7 @@ use std::io::{Read, Write};
 use std::{env::args, process::ExitCode};
 use users::{get_current_gid, get_current_uid};
 
-use g213_colours::commands::{get_command, Command, Run, Status};
+use g213_colours::commands::{get_command, Command, Run, Status, Successful};
 use g213_colours::g213_keyboard::find_g213_keyboard;
 
 const CONFIG_FILE: &str = ".g213-cols.json";
@@ -76,9 +76,13 @@ fn main() -> ExitCode {
     let cmd_status = command.run(&device);
 
     // Save the command for future use above, if it was successful
-    if let Status::Success = cmd_status {
+    if Status::Success == cmd_status {
         save_command(&command);
     }
 
-    ExitCode::from(cmd_status as u8)
+    if cmd_status.successful() {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(cmd_status as u8)
+    }
 }
