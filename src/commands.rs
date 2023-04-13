@@ -94,7 +94,7 @@ impl Run for Command {
             Command::List(args) => !args.is_empty(),
             Command::Saved => false,
             Command::Help(args) => !args.is_empty(),
-            Command::Unknown(_) => false,
+            Command::Unknown(args) => !args.is_empty(),
         }
     }
 }
