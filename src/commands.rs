@@ -1,5 +1,12 @@
+use dirs::home_dir;
+use libc::chown;
+use std::ffi::CString;
+use std::fs::File;
+use std::io::{Read, Write};
+
 use rusb::{Device, GlobalContext};
 use serde::{Deserialize, Serialize};
+use users::{get_current_gid, get_current_uid};
 
 use crate::g213_keyboard::{
     self, limit_speed, set_breathe, set_cycle, set_keyboard_colour, set_region_colour, show_info,
@@ -33,7 +40,7 @@ pub enum Command {
     Breathe(Vec<String>),
     Cycle(Vec<String>),
     List(Vec<String>),
-    Saved(Vec<String>),
+    Saved,
     Help(Vec<String>),
     Unknown(Vec<String>),
 }
@@ -48,7 +55,7 @@ pub fn get_command(args: &[String]) -> Command {
         "breathe" | "b" => Command::Breathe(args[1..].to_vec()),
         "cycle" | "cy" => Command::Cycle(args[1..].to_vec()),
         "list" | "l" => Command::List(args[1..].to_vec()),
-        "saaved" | "s" => Command::Saved(args[1..].to_vec()),
+        "saved" | "s" => Command::Saved,
         "help" | "h" | "?" => Command::Help(args[1..].to_vec()),
         _ => Command::Unknown(args.to_vec()),
     }
@@ -68,10 +75,10 @@ impl Run for Command {
             Command::Breathe(args) => breathe_command(device, args),
             Command::Cycle(args) => cycle_command(device, args),
             Command::List(args) => list_command(args),
-            Command::Saved(args) => saved_command(args),
+            Command::Saved => saved_command(),
             Command::Help(args) => help_command(device, args),
             Command::Unknown(args) => {
-                eprintln!("Uknown command: '{}'", args.join(" "));
+                eprintln!("Uknown command: {}", args.join(" "));
                 Status::SuccessNoSave
             }
         }
@@ -85,11 +92,59 @@ impl Run for Command {
             Command::Breathe(args) => !args.is_empty(),
             Command::Cycle(args) => !args.is_empty(),
             Command::List(args) => !args.is_empty(),
-            Command::Saved(args) => !args.is_empty(),
+            Command::Saved => false,
             Command::Help(args) => !args.is_empty(),
             Command::Unknown(_) => false,
         }
     }
+}
+
+// ----------------------------------------------------------------------------
+
+const CONFIG_FILE: &str = ".g213-cols.json";
+
+fn config_file_path() -> String {
+    match home_dir() {
+        Some(path) => format!("{}/{}", path.to_string_lossy(), CONFIG_FILE),
+        None => String::new(),
+    }
+}
+
+pub fn get_saved_command() -> Option<Command> {
+    let path = config_file_path();
+
+    let f = File::open(path);
+
+    if let Ok(mut fh) = f {
+        let mut saved_cmd = String::new();
+
+        fh.read_to_string(&mut saved_cmd)
+            .expect("Unable to read saved command");
+
+        let command = serde_json::from_str(&saved_cmd).expect("Unable to use saved command");
+
+        return Some(command);
+    }
+
+    None
+}
+
+pub fn set_file_ownership_to_me(path: String) {
+    unsafe {
+        let c_path = CString::new(path).unwrap();
+        chown(c_path.as_ptr(), get_current_uid(), get_current_gid());
+    }
+}
+
+pub fn save_command(command: &Command) {
+    let ser_command = serde_json::to_string(&command).unwrap();
+    let path = config_file_path();
+
+    let mut f = File::create(&path).expect("Unable to open config file for saving");
+
+    Write::write_all(&mut f, ser_command.as_bytes()).expect("Unable to save command");
+
+    set_file_ownership_to_me(path);
 }
 
 // ----------------------------------------------------------------------------
@@ -197,8 +252,13 @@ fn list_command(args: &[String]) -> Status {
     Status::SuccessNoSave
 }
 
-fn saved_command(args: &[String]) -> Status {
-    println!("TODO: Show saved command.");
+fn saved_command() -> Status {
+    let command = get_saved_command();
+
+    match command {
+        Some(cmd) => println!("Saved command: {:?}", cmd),
+        None => println!("No currently saved command"),
+    }
 
     Status::SuccessNoSave
 }
