@@ -18,7 +18,7 @@ fn main() -> ExitCode {
             if let Some(cmd) = get_saved_command() {
                 command = cmd;
 
-                eprintln!("Using saved command: {:?}", command);
+                eprintln!("Using saved command: {}", command);
             }
         }
     }

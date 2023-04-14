@@ -1,6 +1,7 @@
 use dirs::home_dir;
 use libc::chown;
 use std::ffi::CString;
+use std::fmt::Display;
 use std::fs::File;
 use std::io::{Read, Write};
 
@@ -40,9 +41,27 @@ pub enum Command {
     Breathe(Vec<String>),
     Cycle(Vec<String>),
     List(Vec<String>),
+    Info,
     Saved,
     Help(Vec<String>),
     Unknown(Vec<String>),
+}
+
+impl Display for Command {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Command::Colour(args) => write!(f, "color {}", args.join(" ")),
+            Command::Region(args) => write!(f, "region {}", args.join(" ")),
+            Command::Regions(args) => write!(f, "region {}", args.join(" ")),
+            Command::Breathe(args) => write!(f, "breathe {}", args.join(" ")),
+            Command::Cycle(args) => write!(f, "cycle {}", args.join(" ")),
+            Command::List(args) => write!(f, "list {}", args.join(" ")),
+            Command::Info => write!(f, "info"),
+            Command::Saved => write!(f, "saved"),
+            Command::Help(args) => write!(f, "help {}", args.join(" ")),
+            Command::Unknown(args) => write!(f, "unknown {}", args.join(" ")),
+        }
+    }
 }
 
 pub fn get_command(args: &[String]) -> Command {
@@ -55,6 +74,7 @@ pub fn get_command(args: &[String]) -> Command {
         "breathe" | "b" => Command::Breathe(args[1..].to_vec()),
         "cycle" | "cy" => Command::Cycle(args[1..].to_vec()),
         "list" | "l" => Command::List(args[1..].to_vec()),
+        "info" | "i" => Command::Info,
         "saved" | "s" => Command::Saved,
         "help" | "h" | "?" => Command::Help(args[1..].to_vec()),
         _ => Command::Unknown(args.to_vec()),
@@ -75,8 +95,9 @@ impl Run for Command {
             Command::Breathe(args) => breathe_command(device, args),
             Command::Cycle(args) => cycle_command(device, args),
             Command::List(args) => list_command(args),
+            Command::Info => info_command(device),
             Command::Saved => saved_command(),
-            Command::Help(args) => help_command(device, args),
+            Command::Help(args) => help_command(args),
             Command::Unknown(args) => {
                 eprintln!("Uknown command: {}", args.join(" "));
                 Status::SuccessNoSave
@@ -92,9 +113,9 @@ impl Run for Command {
             Command::Breathe(args) => !args.is_empty(),
             Command::Cycle(args) => !args.is_empty(),
             Command::List(args) => !args.is_empty(),
-            Command::Saved => false,
             Command::Help(args) => !args.is_empty(),
             Command::Unknown(args) => !args.is_empty(),
+            _ => false,
         }
     }
 }
@@ -256,19 +277,14 @@ fn saved_command() -> Status {
     let command = get_saved_command();
 
     match command {
-        Some(cmd) => println!("Saved command: {:?}", cmd),
+        Some(cmd) => println!("Saved command: {}", cmd),
         None => println!("No currently saved command"),
     }
 
     Status::SuccessNoSave
 }
 
-fn help_command(device: &Device<GlobalContext>, _args: &[String]) -> Status {
-    const VERSION: &str = env!("CARGO_PKG_VERSION");
-
-    println!("g213-cols - version {}\n", VERSION);
-    println!("You do have a G213 keyboard ✅\n");
-
+fn info_command(device: &Device<GlobalContext>) -> Status {
     println!("Device bus:   {}", device.bus_number());
     println!("Device #:     {}", device.address());
     println!("Device speed: {:?}", device.speed());
@@ -276,7 +292,15 @@ fn help_command(device: &Device<GlobalContext>, _args: &[String]) -> Status {
     // Bit hacky, directly outputs info
     show_info(device);
 
-    println!("\nPlease see -- https://crates.io/crates/g213_colours");
+    Status::SuccessNoSave
+}
+
+fn help_command(_args: &[String]) -> Status {
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+    println!("g213-cols - version {}\n", VERSION);
+    println!("You do have a G213 keyboard ✅\n");
+    println!("Please see -- https://crates.io/crates/g213_colours");
 
     Status::SuccessNoSave
 }

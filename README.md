@@ -66,6 +66,12 @@ Choosing an invalid colour will result in RED being used. You can also use 'rand
 | `g213-cols cycle 1000`                                | sets the cycle time (in ms) all colours                       |
 | Use last successful saved command                     |                                                               |
 | `g213-cols`                                           | Runs the last successful saved command from ~/.g213-cols.json |
+| Show saved command                                    |                                                               |
+| `g213-cols saved`                                     | Display the last successful saved command                     |
+| Show keyboard info                                    |                                                               |
+| `g213-cols info`                                      | Show USB info for keyboard                                    |
+| List X11 colours                                      |                                                               |
+| `g213-cols list [name]`                               | Show X11 colours that contain optional [name] or all colours  |
 
 ### Abbreviations
 
@@ -76,6 +82,9 @@ Choosing an invalid colour will result in RED being used. You can also use 'rand
 | regions | rs           |
 | breathe | b            |
 | cycle   | cy           |
+| saved   | s            |
+| info    | i            |
+| list    | l            |
 | help    | h or ?       |
 
 ## Todo
