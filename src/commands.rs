@@ -259,9 +259,16 @@ fn cycle_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
 
 fn list_command(args: &[String]) -> Status {
     let names = x11_colour_names();
+    let target: String = if args.is_empty() {
+        "".to_string()
+    } else {
+        args[0].to_ascii_lowercase()
+    };
+
+    eprintln!("Target = {}", target);
 
     for name in names {
-        if args.is_empty() || name.contains(&args[0]) {
+        if target.is_empty() || name.contains(&target) {
             println!(
                 "{} {:#08x}",
                 name,

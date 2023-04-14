@@ -1,6 +1,6 @@
 [package]
 name = "g213_colours"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 license = "MIT"
 description = "A utility to set the G213 keyboard backlight. Based on https://github.com/SebiTimeWaster/G213Colors."
