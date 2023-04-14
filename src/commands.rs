@@ -265,8 +265,6 @@ fn list_command(args: &[String]) -> Status {
         args[0].to_ascii_lowercase()
     };
 
-    eprintln!("Target = {}", target);
-
     for name in names {
         if target.is_empty() || name.contains(&target) {
             println!(
