@@ -786,3 +786,13 @@
 139   0   0		DarkRed
 144 238 144		light green
 144 238 144		LightGreen
+
+# Additional colours
+
+220  20  60   Crimson
+  0 255 255   Aqua
+102  51 153   RebeccaPurple
+75   0  130   Indigo
+255  0  255   Fuchsia
+  0 128 128   Teal
+192 192 192   Silver
