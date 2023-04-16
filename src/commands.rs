@@ -258,6 +258,8 @@ fn cycle_command(device: &Device<GlobalContext>, args: &[String]) -> Status {
 }
 
 fn list_command(args: &[String]) -> Status {
+    let mut status = Status::Failure;
+
     let names = x11_colour_names();
     let target: String = if args.is_empty() {
         "".to_string()
@@ -265,17 +267,18 @@ fn list_command(args: &[String]) -> Status {
         args[0].to_ascii_lowercase()
     };
 
-    for name in names {
+    for name in &names {
         if target.is_empty() || name.contains(&target) {
             println!(
                 "{} {:#08x}",
                 name,
                 get_x11_colour(&[name.to_string()]).unwrap()
             );
+            status = Status::SuccessNoSave;
         }
     }
 
-    Status::SuccessNoSave
+    status
 }
 
 fn saved_command() -> Status {
