@@ -50,7 +50,7 @@ pub enum Command {
 impl Display for Command {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Command::Colour(args) => write!(f, "color {}", args.join(" ")),
+            Command::Colour(args) => write!(f, "colour {}", args.join(" ")),
             Command::Region(args) => write!(f, "region {}", args.join(" ")),
             Command::Regions(args) => write!(f, "region {}", args.join(" ")),
             Command::Breathe(args) => write!(f, "breathe {}", args.join(" ")),
