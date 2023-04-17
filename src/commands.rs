@@ -52,7 +52,7 @@ impl Display for Command {
         match self {
             Command::Colour(args) => write!(f, "colour {}", args.join(" ")),
             Command::Region(args) => write!(f, "region {}", args.join(" ")),
-            Command::Regions(args) => write!(f, "region {}", args.join(" ")),
+            Command::Regions(args) => write!(f, "regions {}", args.join(" ")),
             Command::Breathe(args) => write!(f, "breathe {}", args.join(" ")),
             Command::Cycle(args) => write!(f, "cycle {}", args.join(" ")),
             Command::List(args) => write!(f, "list {}", args.join(" ")),
