@@ -76,7 +76,7 @@ fn adjust_3_digit_colour(colour: u32) -> u32 {
     (d1 * 16 + d1) << 16 | (d2 * 16 + d2) << 8 | (d3 * 16 + d3)
 }
 
-pub const NUM_X11_COLOURS: usize = 752;
+pub const NUM_X11_COLOURS: usize = 759;
 pub const DEFAULT_WHITE: u32 = 0xffd0c0;
 const RANDOM: &str = "random";
 const RANDOM_X11: &str = "randomx11";
