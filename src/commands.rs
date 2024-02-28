@@ -99,7 +99,7 @@ impl Run for Command {
             Command::Saved => saved_command(),
             Command::Help(args) => help_command(args),
             Command::Unknown(args) => {
-                eprintln!("Uknown command: {}", args.join(" "));
+                eprintln!("Unknown command: {}", args.join(" "));
                 Status::SuccessNoSave
             }
         }

@@ -69,11 +69,15 @@ fn random_x11_colour() -> (&'static String, u32) {
 }
 
 fn adjust_3_digit_colour(colour: u32) -> u32 {
-    let d1: u32 = colour & 0xf00 >> 8;
-    let d2: u32 = colour & 0xf0 >> 4;
-    let d3: u32 = colour & 0xf;
+    if colour & 0xfff000 == 0 {
+        let d1: u32 = (colour & 0xf00) >> 8;
+        let d2: u32 = (colour & 0xf0) >> 4;
+        let d3: u32 = colour & 0xf;
 
-    (d1 * 16 + d1) << 16 | (d2 * 16 + d2) << 8 | (d3 * 16 + d3)
+        (d1 * 16 + d1) << 16 | (d2 * 16 + d2) << 8 | (d3 * 16 + d3)
+    } else {
+        colour
+    }
 }
 
 pub const NUM_X11_COLOURS: usize = 759;
@@ -383,5 +387,30 @@ mod x11_colours_tests {
         let args = to_string_vec(vec!["alice", "blue", "medium", "violet", "red"]);
 
         assert_eq!(get_x11_colours(&args, 2), Some(vec![0xf0f8ff, 0xc71585]));
+    }
+
+    #[test]
+    fn adjust_3_digit_111() {
+        assert_eq!(adjust_3_digit_colour(0x111), 0x111111);
+    }
+
+    #[test]
+    fn adjust_3_digit_321() {
+        assert_eq!(adjust_3_digit_colour(0x321), 0x332211);
+    }
+
+    #[test]
+    fn adjust_3_digit_345678_unchanged() {
+        assert_eq!(adjust_3_digit_colour(0x345678), 0x345678);
+    }
+
+    #[test]
+    fn adjust_3_digit_35678_unchanged() {
+        assert_eq!(adjust_3_digit_colour(0x35678), 0x35678);
+    }
+
+    #[test]
+    fn adjust_3_digit_3678_unchanged() {
+        assert_eq!(adjust_3_digit_colour(0x3678), 0x3678);
     }
 }
