@@ -306,8 +306,10 @@ fn info_command(device: &Device<GlobalContext>) -> Status {
 fn help_command(_args: &[String]) -> Status {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    println!("g213-cols - version {}\n", VERSION);
-    println!("You do have a G213 keyboard ✅\n");
+    println!(
+        "\ng213-cols - version {} ― Found a G213 keyboard ✅",
+        VERSION
+    );
 
     println!(
         r#"
@@ -381,5 +383,19 @@ mod commands_tests {
         });
 
         assert!(cmd.has_args());
+    }
+
+    #[test]
+    fn successful_status() {
+        let res = Status::Success.successful() && Status::SuccessNoSave.successful();
+
+        assert_eq!(res, true);
+    }
+
+    #[test]
+    fn unsuccessful_status() {
+        let res = Status::Failure.successful();
+
+        assert_eq!(res, false);
     }
 }
