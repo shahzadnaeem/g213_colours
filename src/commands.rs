@@ -308,7 +308,40 @@ fn help_command(_args: &[String]) -> Status {
 
     println!("g213-cols - version {}\n", VERSION);
     println!("You do have a G213 keyboard ✅\n");
-    println!("Please see -- https://crates.io/crates/g213_colours");
+
+    println!(
+        r#"
++ ----------------------------------------------------- + ------------------------------------------------------------- +
+| Command                                               | Details                                                       |
+| ----------------------------------------------------- + ------------------------------------------------------------- |
+| Set whole keyboard colour                             |                                                               |
+| `g213-cols colour`                                    | sets the default 'white'                                      |
+| `g213-cols colour ffff00`                             | sets the specified hex colour, eg yellow                      |
+|                                                       | NOTE: 3 digit hex colour conversion - 1af -> 11aaff           |
+| `g213-cols colour lawn green`                         | sets the named X11 colour                                     |
+| `g213-cols colour "alice blue"`                       | sets the named X11 colour - as a single argument              |
+| `g213-cols colour dark_slate_blue`                    | sets the named X11 colour - underscores become spaces         |
+| `g213-cols colour random`                             | sets a random colour                                          |
+| Set the colour of a specific keyboard region - 1 to 5 |                                                               |
+| `g213-cols region 2 [colour]`                         | sets the region to the [colour] as defined above              |
+| Set the colours of all 5 keyboard regions             |                                                               |
+| `g213-cols regions [colour colour ...]`               | sets the regions to the [colours] as defined above            |
+|                                                       | last supplied colour is repeated to set all 5 regions         |
+| Set 'breathe' mode                                    |                                                               |
+| `g213-cols breathe 1000 [colour]`                     | sets the breathe time (in ms) for the [colour]                |
+| Set 'cycle' mode                                      |                                                               |
+| `g213-cols cycle 1000`                                | sets the cycle time (in ms) all colours                       |
+| Use last successful saved command                     |                                                               |
+| `g213-cols`                                           | Runs the last successful saved command from ~/.g213-cols.json |
+| Show saved command                                    |                                                               |
+| `g213-cols saved`                                     | Display the last successful saved command                     |
+| Show keyboard info                                    |                                                               |
+| `g213-cols info`                                      | Show USB info for keyboard                                    |
+| List X11 colours                                      |                                                               |
+| `g213-cols list [name]`                               | Show X11 colours that contain optional [name] or all colours  |
++ ----------------------------------------------------- + ------------------------------------------------------------- +
+"#
+    );
 
     Status::SuccessNoSave
 }
