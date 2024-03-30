@@ -342,6 +342,20 @@ fn help_command(_args: &[String]) -> Status {
 | List X11 colours                                      |                                                               |
 | `g213-cols list [name]`                               | Show X11 colours that contain optional [name] or all colours  |
 + ----------------------------------------------------- + ------------------------------------------------------------- +
+
++ ------- + ------------ +
+| Command | Abbreviation |
+| ------- + ------------ |
+| colour  | c            |
+| region  | r            |
+| regions | rs           |
+| breathe | b            |
+| cycle   | cy           |
+| saved   | s            |
+| info    | i            |
+| list    | l            |
+| help    | h or ?       |
++ ------- + ------------ +
 "#
     );
 
